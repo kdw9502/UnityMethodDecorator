@@ -1,16 +1,13 @@
 ﻿using UnityEditor;
 
-public class EditorMenu
+namespace FunctionCallCount
 {
-    [MenuItem("UnityFunctionCallCounter/Inject All Dll")]
-    public static void Inject()
+    public class EditorMenu
     {
-        ILInjector.InjectAll();        
+        [MenuItem("UnityFunctionCallCounter/Inject Dll")]
+        public static void Inject()
+        {
+            ILInjector.InjectAll();        
+        }
     }
-    [MenuItem("UnityFunctionCallCounter/Inject Selected Dll")]
-    public static void InjectDll()
-    {
-        ILInjector.Inject();        
-    }
-    
 }

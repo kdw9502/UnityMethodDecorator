@@ -2,33 +2,38 @@
 using UnityEngine;
 using UnityEngine.Scripting;
 
-public static class CallCounter
+namespace FunctionCallCount
 {
-    private static readonly Dictionary<(string className, string functionName), int> callCountDict = new();
-
-    public static int GetFunctionCallCount(string className, string functionName)
+    public static class CallCounter
     {
-        var key = (className, functionName);
-        return callCountDict.ContainsKey(key) ? callCountDict[key] : 0;
-    }
-    [Preserve]
-    public static void IncreaseFunctionCallCount(string className, string functionName)
-    {
-        var key = (className, functionName);
+        private static readonly Dictionary<(string className, string functionName), int> callCountDict = new();
 
-        if (!callCountDict.ContainsKey(key))
+        public static int GetFunctionCallCount(string className, string functionName)
         {
-            callCountDict[key] = 0;
+            var key = (className, functionName);
+            return callCountDict.ContainsKey(key) ? callCountDict[key] : 0;
         }
 
-        callCountDict[key]++;
-        
-        // Debug.Log($"CallCount {key} : {callCountDict[key]}");
-    }
-    
-}
-[AttributeUsage(AttributeTargets.Method)]
-public class CallCountAttribute : Attribute
-{
+        [Preserve]
+        public static void IncreaseFunctionCallCount(string className, string functionName)
+        {
+            var key = (className, functionName);
 
+            if (!callCountDict.ContainsKey(key))
+            {
+                callCountDict[key] = 0;
+            }
+
+            callCountDict[key]++;
+
+            // Debug.Log($"CallCount {key} : {callCountDict[key]}");
+        }
+
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class CallCountAttribute : Attribute
+    {
+
+    }
 }
