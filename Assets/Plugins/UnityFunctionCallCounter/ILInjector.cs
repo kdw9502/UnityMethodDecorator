@@ -17,26 +17,25 @@ using MethodBody = Mono.Cecil.Cil.MethodBody;
 public class ILInjector
 {
     public static bool isInjected = false;
-
-    [DidReloadScripts]
+    [PostProcessBuild(1000)]
+    private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
+    {
+        isInjected = false;
+    }
+    
+    
+    [PostProcessScene]
     public static void AutoInject()
     {
         InjectAll();
     }
 
-    [PostProcessScene]
+    [InitializeOnLoadMethod]
     public static void InjectAll()
     {
         if (isInjected)
             return;
 
-        // var types = AppDomain.CurrentDomain.GetAssemblies()
-        //     .Where(assembly => !(assembly.ManifestModule is System.Reflection.Emit.ModuleBuilder))
-        //     .SelectMany(assembly => assembly.GetTypes());
-
-        // var methods = types
-        // .SelectMany(type => type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic |
-        // BindingFlags.DeclaredOnly));
         var sep = Path.DirectorySeparatorChar;
         var assemblyPath = Application.dataPath + sep + ".." + sep + "Library" + sep + "ScriptAssemblies" + sep +
                            "Assembly-CSharp.dll";

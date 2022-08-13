@@ -23,7 +23,7 @@ public static class CallCounter
 
         callCountDict[key]++;
         
-        Debug.Log($"CallCount {key} : {callCountDict[key]}");
+        // Debug.Log($"CallCount {key} : {callCountDict[key]}");
     }
     
 }
