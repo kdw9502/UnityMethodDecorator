@@ -3,7 +3,7 @@ Get count of method call in runtime using dll injection
 
 ## Installing
 
-[Download package](https://github.com/kdw9502/UnityMethodCallCounter/releases/download/1.0.0/UnityFunctionCallCounter.unitypackage) and import to your Unity project.
+[Download package](https://github.com/kdw9502/UnityMethodCallCounter/releases/download/1.0.0/UnityMethodCallCounter.unitypackage) and import to your Unity project.
 
 ## Example
 
