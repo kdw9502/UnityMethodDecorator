@@ -1,5 +1,5 @@
 # UnityMethodCallCounter
-Get count of function call in runtime using dll injection
+Get count of method call in runtime using dll injection
 
 ## Installing
 
