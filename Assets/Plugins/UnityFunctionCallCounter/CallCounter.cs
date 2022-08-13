@@ -1,22 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Scripting;
 
-public class CallCounter
+public static class CallCounter
 {
-    private readonly Dictionary<string, int> callCountDict = new();
+    private static readonly Dictionary<(string className, string functionName), int> callCountDict = new();
 
-    public int GetFunctionCallCount(string functionName)
+    public static int GetFunctionCallCount(string className, string functionName)
     {
-        return callCountDict[functionName];
+        var key = (className, functionName);
+        return callCountDict.ContainsKey(key) ? callCountDict[key] : 0;
     }
-
-    public void IncreaseFunctionCallCount(string functionName)
+    [Preserve]
+    public static void IncreaseFunctionCallCount(string className, string functionName)
     {
-        if (!callCountDict.ContainsKey(functionName))
+        var key = (className, functionName);
+
+        if (!callCountDict.ContainsKey(key))
         {
-            callCountDict[functionName] = 0;
+            callCountDict[key] = 0;
         }
 
-        callCountDict[functionName]++;
+        callCountDict[key]++;
+        
+        Debug.Log($"CallCount {key} : {callCountDict[key]}");
     }
     
+}
+[AttributeUsage(AttributeTargets.Method)]
+public class CallCountAttribute : Attribute
+{
+
 }
