@@ -16,7 +16,7 @@ using MethodBody = Mono.Cecil.Cil.MethodBody;
 //https://www.reddit.com/r/csharp/comments/5qtpso/using_monocecil_in_c_with_unity/
 public class ILInjector
 {
-    public static bool isInjected = false;
+    private static bool isInjected = false;
     [PostProcessBuild(1000)]
     private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
     {
