@@ -12,7 +12,7 @@ using Mono.Cecil.Rocks;
 using UnityEditor.Callbacks;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
-namespace FunctionCallCount
+namespace MethodCallCount
 {
 //https://programmer.group/use-mono.cecil-to-inject-code-into-dll-in-unity.html
 //https://www.reddit.com/r/csharp/comments/5qtpso/using_monocecil_in_c_with_unity/
@@ -67,7 +67,7 @@ namespace FunctionCallCount
             var inst = method.Body.Instructions;
             var ilProcessor = method.Body.GetILProcessor();
             var increaseCallCountRef = assemblyDefinition.MainModule.ImportReference(typeof(CallCounter).GetMethod(
-                "IncreaseFunctionCallCount",
+                "IncreaseMethodCallCount",
                 new[] {typeof(string), typeof(string)}));
             var newInst = ilProcessor.Create(OpCodes.Ldstr, type.Name);
             var curernt = InsertBefore(ilProcessor, firstInst, newInst);

@@ -1,10 +1,10 @@
 ﻿using UnityEditor;
 
-namespace FunctionCallCount
+namespace MethodCallCount
 {
     public class EditorMenu
     {
-        [MenuItem("UnityFunctionCallCounter/Inject Dll")]
+        [MenuItem("UnityMethodCallCounter/Inject Dll")]
         public static void Inject()
         {
             ILInjector.InjectAll();        

@@ -2,20 +2,20 @@
 using UnityEngine;
 using UnityEngine.Scripting;
 
-namespace FunctionCallCount
+namespace MethodCallCount
 {
     public static class CallCounter
     {
         private static readonly Dictionary<(string className, string functionName), int> callCountDict = new();
 
-        public static int GetFunctionCallCount(string className, string functionName)
+        public static int GetMethodCallCount(string className, string functionName)
         {
             var key = (className, functionName);
             return callCountDict.ContainsKey(key) ? callCountDict[key] : 0;
         }
 
         [Preserve]
-        public static void IncreaseFunctionCallCount(string className, string functionName)
+        public static void IncreaseMethodCallCount(string className, string functionName)
         {
             var key = (className, functionName);
 
