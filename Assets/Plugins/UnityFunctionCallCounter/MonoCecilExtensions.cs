@@ -7,7 +7,7 @@ public static class MonoCecilExtensions
 {
     public static Type GetMonoType(this TypeReference type)
     {
-        return Type.GetType(type.GetReflectionName(), true);
+        return Type.GetType(type.GetReflectionName(), false);
     }
 
     private static string GetReflectionName(this TypeReference type)
