@@ -4,7 +4,7 @@ Python style decorator (add action to method with attribute) implement using dll
 
 ## Installing
 
-[Download package](https://github.com/kdw9502/UnityMethodCallCounter/releases/download/1.0.0/UnityMethodCallCounter.unitypackage) and import to your Unity project.
+[Download package](https://github.com/kdw9502/UnityDecoratorAttribute/releases/download/2.0.0/UnityDecoratorAttribute.unitypackage) and import to your Unity project.
 
 ## Usage
 
