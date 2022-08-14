@@ -1,5 +1,6 @@
-# UnityMethodCallCounter
-Get count of method call in runtime using dll injection
+# UnityDecoratorAttribute
+
+Python style decorator (add action to method with attribute) implement using dll injection.
 
 ## Installing
 
