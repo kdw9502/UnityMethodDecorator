@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace MethodCallCount
+namespace UnityDecoratorAttribute
 {
     public class EditorMenu
     {

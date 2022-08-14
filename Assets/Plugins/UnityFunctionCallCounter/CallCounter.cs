@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Scripting;
 
-namespace MethodCallCount
+namespace UnityDecoratorAttribute
 {
     public static class CallCounter
     {

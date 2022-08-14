@@ -15,14 +15,14 @@ using UnityEditor.Callbacks;
 using Debug = UnityEngine.Debug;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 using ParameterType = DecoratorAttribute.ParameterType; 
-namespace MethodCallCount
+namespace UnityDecoratorAttribute
 {
 //https://programmer.group/use-mono.cecil-to-inject-code-into-dll-in-unity.html
 //https://www.reddit.com/r/csharp/comments/5qtpso/using_monocecil_in_c_with_unity/
     public class ILInjector
     {
         private static bool isInjected = false;
-
+        private const int INJECTION_NOP_COUNT = 3;
         [PostProcessBuild(1000)]
         private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
         {
@@ -38,11 +38,13 @@ namespace MethodCallCount
             Debug.Log($"Inject Elapsed : {stopwatch.ElapsedMilliseconds:0}ms");
         }
 
-        [InitializeOnLoadMethod]
+        
+        // [InitializeOnLoadMethod]
         public static void InjectAll()
         {
             if (isInjected)
                 return;
+            isInjected = true;
 
             var sep = Path.DirectorySeparatorChar;
             var assemblyPath = Application.dataPath + sep + ".." + sep + "Library" + sep + "ScriptAssemblies" + sep +
@@ -61,25 +63,24 @@ namespace MethodCallCount
                         continue;
 
                     Inject(type, method, decoratorAttribute, assemblyDefinition);
-                    Debug.Log("Inject " + type.Name + "::" + method.Name);
                 }
             }
-
+            
             assemblyDefinition.Write();
-            isInjected = true;
         }
 
         private static void Inject(TypeDefinition type, MethodDefinition method, CustomAttribute attribute, AssemblyDefinition assemblyDefinition)
         {
+            var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
             var attributeType = attribute.AttributeType.GetMonoType();
-            var preAction = attributeType.GetMethod("PreAction");
+            var preAction = attributeType.GetMethod("PreAction", bindingFlag);
             if (preAction == null)
             {
                 Debug.LogError($"{attribute.AttributeType.Name} doesn't have PreAction method");
                 return;
             }
 
-            IEnumerable<ParameterType> preActionParams = attributeType.GetProperty("ParameterTypes")?.GetValue(null) as ParameterType[];
+            IEnumerable<ParameterType> preActionParams = attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as ParameterType[];
             if (preActionParams == null)
             {
                 preActionParams = Enumerable.Empty<ParameterType>();
@@ -93,6 +94,22 @@ namespace MethodCallCount
 
             Instruction newInst;
 
+            if (method.Body.Instructions.Count >= INJECTION_NOP_COUNT)
+            {
+                if (method.Body.Instructions.Take(3).All(inst => inst.OpCode == OpCodes.Nop))
+                {
+                    Debug.Log("Already Injected " + type.Name + "::" + method.Name);
+                    return;
+                }
+            }
+            
+            // To Check Injection, Insert 3 nop  
+            for (int i = 0; i < INJECTION_NOP_COUNT; i++)
+            {
+                newInst = ilProcessor.Create(OpCodes.Nop);
+                InsertBefore(ilProcessor, firstInst, newInst);
+            }
+            
             foreach (var parameter in preActionParams)
             {
                 switch (parameter)
@@ -106,7 +123,7 @@ namespace MethodCallCount
                         InsertBefore(ilProcessor, firstInst, newInst);
                         break;
                     case ParameterType.ParameterValues:
-                        var paramLength = method.Parameters.Count;
+                        var paramLength = method.Parameters.Count + (method.IsStatic ? 0 : 1);
                         for (byte i = 0; i < paramLength; i++)
                         {
                             newInst = ilProcessor.Create(OpCodes.Ldarg_S, i);
@@ -118,8 +135,12 @@ namespace MethodCallCount
 
             newInst = ilProcessor.Create(OpCodes.Call, preActionRef);
             InsertBefore(ilProcessor, firstInst, newInst);
+            newInst = ilProcessor.Create(OpCodes.Nop);
+            InsertBefore(ilProcessor, firstInst, newInst);
 
             ComputeOffsets(method.Body);
+            
+            Debug.Log("Inject " + type.Name + "::" + method.Name);
         }
 
         public static void Inject()
