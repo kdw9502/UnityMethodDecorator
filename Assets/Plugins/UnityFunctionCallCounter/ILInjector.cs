@@ -14,7 +14,8 @@ using Mono.Cecil.Rocks;
 using UnityEditor.Callbacks;
 using Debug = UnityEngine.Debug;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
-using ParameterType = DecoratorAttribute.ParameterType; 
+using ParameterType = DecoratorAttribute.ParameterType;
+
 namespace UnityDecoratorAttribute
 {
 //https://programmer.group/use-mono.cecil-to-inject-code-into-dll-in-unity.html
@@ -23,6 +24,7 @@ namespace UnityDecoratorAttribute
     {
         private static bool isInjected = false;
         private const int INJECTION_NOP_COUNT = 3;
+
         [PostProcessBuild(1000)]
         private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
         {
@@ -30,7 +32,8 @@ namespace UnityDecoratorAttribute
         }
 
 
-        [PostProcessScene]
+        [InitializeOnLoadMethod]
+        // [PostProcessScene]
         public static void AutoInject()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -38,8 +41,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"Inject Elapsed : {stopwatch.ElapsedMilliseconds:0}ms");
         }
 
-        
-        // [InitializeOnLoadMethod]
+
         public static void InjectAll()
         {
             if (isInjected)
@@ -57,21 +59,24 @@ namespace UnityDecoratorAttribute
                 var methods = type.GetMethods();
                 foreach (var method in methods)
                 {
-                    var decoratorAttribute = method.CustomAttributes.FirstOrDefault(attr => typeof(DecoratorAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
-                    
+                    var decoratorAttribute = method.CustomAttributes.FirstOrDefault(attr =>
+                        typeof(DecoratorAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
+
                     if (decoratorAttribute == null)
                         continue;
 
                     Inject(type, method, decoratorAttribute, assemblyDefinition);
                 }
             }
-            
+
             assemblyDefinition.Write();
         }
 
-        private static void Inject(TypeDefinition type, MethodDefinition method, CustomAttribute attribute, AssemblyDefinition assemblyDefinition)
+        private static void Inject(TypeDefinition type, MethodDefinition method, CustomAttribute attribute,
+            AssemblyDefinition assemblyDefinition)
         {
-            var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+            var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
+                              BindingFlags.FlattenHierarchy;
             var attributeType = attribute.AttributeType.GetMonoType();
             var preAction = attributeType.GetMethod("PreAction", bindingFlag);
             if (preAction == null)
@@ -80,15 +85,15 @@ namespace UnityDecoratorAttribute
                 return;
             }
 
-            IEnumerable<ParameterType> preActionParams = attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as ParameterType[];
+            IEnumerable<ParameterType> preActionParams =
+                attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as ParameterType[];
             if (preActionParams == null)
             {
                 preActionParams = Enumerable.Empty<ParameterType>();
             }
 
             var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
-         
-            
+
             var ilProcessor = method.Body.GetILProcessor();
             var firstInst = method.Body.Instructions.First();
 
@@ -98,18 +103,18 @@ namespace UnityDecoratorAttribute
             {
                 if (method.Body.Instructions.Take(3).All(inst => inst.OpCode == OpCodes.Nop))
                 {
-                    Debug.Log("Already Injected " + type.Name + "::" + method.Name);
+                    // Debug.Log("Already Injected " + type.Name + "::" + method.Name);
                     return;
                 }
             }
-            
+
             // To Check Injection, Insert 3 nop  
             for (int i = 0; i < INJECTION_NOP_COUNT; i++)
             {
                 newInst = ilProcessor.Create(OpCodes.Nop);
                 InsertBefore(ilProcessor, firstInst, newInst);
             }
-            
+
             foreach (var parameter in preActionParams)
             {
                 switch (parameter)
@@ -129,6 +134,7 @@ namespace UnityDecoratorAttribute
                             newInst = ilProcessor.Create(OpCodes.Ldarg_S, i);
                             InsertBefore(ilProcessor, firstInst, newInst);
                         }
+
                         break;
                 }
             }
@@ -139,8 +145,8 @@ namespace UnityDecoratorAttribute
             InsertBefore(ilProcessor, firstInst, newInst);
 
             ComputeOffsets(method.Body);
-            
-            Debug.Log("Inject " + type.Name + "::" + method.Name);
+
+            // Debug.Log("Inject " + type.Name + "::" + method.Name);
         }
 
         public static void Inject()
@@ -171,8 +177,6 @@ namespace UnityDecoratorAttribute
                 offset += instruction.GetSize();
             }
         }
-        
-
     }
 }
 #endif
