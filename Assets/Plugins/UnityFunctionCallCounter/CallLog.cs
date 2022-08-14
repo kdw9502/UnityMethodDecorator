@@ -5,7 +5,7 @@ using MethodCallCount;
 using UnityEngine;
 using UnityEngine.Scripting;
 
-public class ZeroParameterLogAttribute : DecoratorAttribute
+public class ZeroParameterStaticLogAttribute : DecoratorAttribute
 {
     [Preserve]
     public static void PreAction(string className, string methodName)
@@ -16,7 +16,11 @@ public class ZeroParameterLogAttribute : DecoratorAttribute
     public static ParameterType[] ParameterTypes => new[] {ParameterType.ClassName, ParameterType.MethodName};
 }
 
-public class OneParameterLogAttribute : DecoratorAttribute
+public class ZeroParameterLogAttribute : StaticOneParameterLogAttribute
+{
+}
+
+public class StaticOneParameterLogAttribute : DecoratorAttribute
 {
     [Preserve]
     public static void PreAction(string className, string methodName, object param1)
@@ -28,7 +32,11 @@ public class OneParameterLogAttribute : DecoratorAttribute
         {ParameterType.ClassName, ParameterType.MethodName, ParameterType.ParameterValues};
 }
 
-public class TwoParameterLogAttribute : DecoratorAttribute
+public class OneParameterLogAttribute : StaticTwoParameterLogAttribute
+{
+}
+
+public class StaticTwoParameterLogAttribute : DecoratorAttribute
 {
     [Preserve]
     public static void PreAction(string className, string methodName, object param1, object param2)
@@ -40,7 +48,9 @@ public class TwoParameterLogAttribute : DecoratorAttribute
         {ParameterType.ClassName, ParameterType.MethodName, ParameterType.ParameterValues};
 }
 
-public class ThreeParameterLogAttribute : DecoratorAttribute
+public class TwoParameterLogAttribute: StaticThreeParameterLogAttribute{}
+
+public class StaticThreeParameterLogAttribute : DecoratorAttribute
 {
     [Preserve]
     public static void PreAction(string className, string methodName, object param1, object param2, object param3)
@@ -52,7 +62,8 @@ public class ThreeParameterLogAttribute : DecoratorAttribute
         {ParameterType.ClassName, ParameterType.MethodName, ParameterType.ParameterValues};
 }
 
-public class FourParameterLogAttribute : DecoratorAttribute
+public class ThreeParameterLogAttribute: StaticFourParameterLogAttribute{}
+public class StaticFourParameterLogAttribute : DecoratorAttribute
 {
     [Preserve]
     public static void PreAction(string className, string methodName, object param1, object param2, object param3,

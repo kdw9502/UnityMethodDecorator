@@ -10,6 +10,7 @@ public class AttributeExample : MonoBehaviour
     void Start()
     {
         Application.targetFrameRate = 60;
+        Debug.Log(name);
     }
 
     [CallCount]
@@ -23,26 +24,27 @@ public class AttributeExample : MonoBehaviour
         Param("a");
     }
 
-    [OneParameterLog]
+    [StaticOneParameterLog]
     static void Param(string a)
     {
         Param(a,"b");
     }
 
-    [TwoParameterLog]
+    [StaticTwoParameterLog]
     static void Param(string a, string b)
     {
         Param(a,b,"c");
     }
 
-    [ThreeParameterLog]
+    [StaticThreeParameterLog]
     static void Param(string a, string b, string c)
     {
         Param(a,b,c,"d");
     }
 
-    [FourParameterLog]
+    [StaticFourParameterLog]
     static void Param(string a, string b, string c, string d)
     {
     }
+     
 }
