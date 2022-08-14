@@ -32,8 +32,13 @@ namespace MethodCallCount
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class CallCountAttribute : Attribute
+    public class CallCountAttribute: DecoratorAttribute
     {
+        public static void PreAction(string className, string methodName)
+        {
+            CallCounter.IncreaseMethodCallCount(className, methodName);
+        }
 
+        public static ParameterType[] ParameterTypes => new[] {ParameterType.ClassName, ParameterType.MethodName};
     }
 }
