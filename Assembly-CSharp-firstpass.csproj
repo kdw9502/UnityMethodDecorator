@@ -46,6 +46,7 @@
      <Compile Include="Assets\Plugins\UnityFunctionCallCounter\ILInjector.cs" />
      <Compile Include="Assets\Plugins\UnityFunctionCallCounter\CallCounter.cs" />
      <Compile Include="Assets\Plugins\UnityFunctionCallCounter\MonoCecilExtensions.cs" />
+     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\CallLog.cs" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.5f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

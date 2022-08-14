@@ -106,9 +106,12 @@ namespace MethodCallCount
                         InsertBefore(ilProcessor, firstInst, newInst);
                         break;
                     case ParameterType.ParameterValues:
-                        // var methodParams = method.Parameters
-                        // newInst = ilProcessor.Create(OpCodes.Ldstr, method.Name);
-                        // InsertBefore(ilProcessor, firstInst, newInst);
+                        var paramLength = method.Parameters.Count;
+                        for (byte i = 0; i < paramLength; i++)
+                        {
+                            newInst = ilProcessor.Create(OpCodes.Ldarg_S, i);
+                            InsertBefore(ilProcessor, firstInst, newInst);
+                        }
                         break;
                 }
             }

@@ -6,7 +6,7 @@ using MethodCallCount;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Method)]
 public abstract class DecoratorAttribute : Attribute
 {
     public enum ParameterType

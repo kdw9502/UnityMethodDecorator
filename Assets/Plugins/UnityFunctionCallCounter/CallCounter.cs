@@ -28,10 +28,8 @@ namespace MethodCallCount
 
             // Debug.Log($"CallCount {key} : {callCountDict[key]}");
         }
-
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
     public class CallCountAttribute: DecoratorAttribute
     {
         [Preserve]

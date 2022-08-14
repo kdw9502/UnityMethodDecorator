@@ -5,8 +5,8 @@ using UnityEditor;
 using UnityEngine;
 
 public class AttributeExample : MonoBehaviour
-{    
-    [CallCount]
+{
+    [ZeroParameterLog]
     void Start()
     {
         Application.targetFrameRate = 60;
@@ -18,9 +18,31 @@ public class AttributeExample : MonoBehaviour
     }
 
     [MenuItem("UnityMethodCallCounter/Test")]
-    static void GetCountExample()
+    static void Example()
     {
-        var count = CallCounter.GetMethodCallCount(nameof(AttributeExample), nameof(Update));
-        Debug.Log($"Method Call Count of {nameof(AttributeExample)}, {nameof(Update)} : {count}");
+        Param("a");
+    }
+
+    [OneParameterLog]
+    static void Param(string a)
+    {
+        Param(a,"b");
+    }
+
+    [TwoParameterLog]
+    static void Param(string a, string b)
+    {
+        Param(a,b,"c");
+    }
+
+    [ThreeParameterLog]
+    static void Param(string a, string b, string c)
+    {
+        Param(a,b,c,"d");
+    }
+
+    [FourParameterLog]
+    static void Param(string a, string b, string c, string d)
+    {
     }
 }
