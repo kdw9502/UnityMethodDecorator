@@ -60,6 +60,11 @@ To get number of method calls, call `CallCounter.GetMethodCallCount(className, m
 ![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png)
 
 
+## Limitation
+Currently only support for method in [Assembly-CSharp.dll](https://docs.unity3d.com/2019.4/Documentation/Manual/ScriptCompilationAssemblyDefinitionFiles.html)
+
+Not support for ref parameter.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
