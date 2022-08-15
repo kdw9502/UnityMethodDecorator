@@ -38,6 +38,6 @@ namespace UnityDecoratorAttribute
             CallCounter.IncreaseMethodCallCount(className, methodName);
         }
 
-        public static ParameterType[] ParameterTypes => new[] {ParameterType.ClassName, ParameterType.MethodName};
+        public static PreActionParameterType[] ParameterTypes => new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
     }
 }

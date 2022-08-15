@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityDecoratorAttribute;
@@ -11,10 +12,15 @@ public class AttributeExample : MonoBehaviour
     [ZeroParameterLog]
     private void Start()
     {
-        ParameterLogExample("test a", "test b");
+        Clamp(-99);        
+    }
+    
+    // [CallCount]
+    private void Update()
+    {
     }
 
-    [TwoParameterLog]
+    // [TwoParameterLog]
     private void ParameterLogExample(string a, string b)
     {
     }
@@ -22,32 +28,26 @@ public class AttributeExample : MonoBehaviour
 #if UNITY_EDITOR
     [MenuItem("UnityMethodCallCounter/Test")]
 #endif
-    static void Example()
+    static void GetUpdateCallCount()
     {
-        Param("a");
+
     }
     
-    [StaticOneParameterLog]
     static void Param(string a)
     {
-        Param(a,"b");
     }
-    
-    [StaticTwoParameterLog]
-    static void Param(string a, string b)
+
+    private int A(int a, int b)
     {
-        Param(a,b,"c");
+        int returnValue = 2;
+        Debug.Log(returnValue);
+        Clamp(b);
+        return returnValue;
     }
-    
-    [StaticThreeParameterLog]
-    static void Param(string a, string b, string c)
+    [LogThis]
+    private void Clamp(int a)
     {
-        Param(a,b,c,"d");
+        
+        Debug.Log(a);
     }
-    
-    [StaticFourParameterLog]
-    static void Param(string a, string b, string c, string d)
-    {
-    }
-     
 }

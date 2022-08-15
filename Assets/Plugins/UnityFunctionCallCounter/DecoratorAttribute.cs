@@ -9,12 +9,12 @@ using Debug = UnityEngine.Debug;
 [AttributeUsage(AttributeTargets.Method)]
 public abstract class DecoratorAttribute : Attribute
 {
-    public enum ParameterType
+    public enum PreActionParameterType
     {
         ClassName,
         MethodName,
+        This,
         ParameterValues,
     }
-    
 }
 

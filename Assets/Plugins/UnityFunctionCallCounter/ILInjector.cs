@@ -14,7 +14,6 @@ using Mono.Cecil.Rocks;
 using UnityEditor.Callbacks;
 using Debug = UnityEngine.Debug;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
-using ParameterType = DecoratorAttribute.ParameterType;
 
 namespace UnityDecoratorAttribute
 {
@@ -36,6 +35,9 @@ namespace UnityDecoratorAttribute
         // [PostProcessScene]
         public static void AutoInject()
         {
+            if (EditorApplication.isCompiling || Application.isPlaying)
+                return;
+
             Stopwatch stopwatch = Stopwatch.StartNew();
             InjectAll();
             Debug.Log($"Inject Elapsed : {stopwatch.ElapsedMilliseconds:0}ms");
@@ -85,12 +87,9 @@ namespace UnityDecoratorAttribute
                 return;
             }
 
-            IEnumerable<ParameterType> preActionParams =
-                attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as ParameterType[];
-            if (preActionParams == null)
-            {
-                preActionParams = Enumerable.Empty<ParameterType>();
-            }
+            var preActionEnumParams =
+                attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as DecoratorAttribute.PreActionParameterType[] ??
+                new DecoratorAttribute.PreActionParameterType[] { };
 
             var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
 
@@ -115,23 +114,40 @@ namespace UnityDecoratorAttribute
                 InsertBefore(ilProcessor, firstInst, newInst);
             }
 
-            foreach (var parameter in preActionParams)
+            foreach (var parameter in preActionEnumParams)
             {
                 switch (parameter)
                 {
-                    case ParameterType.ClassName:
+                    case DecoratorAttribute.PreActionParameterType.ClassName:
                         newInst = ilProcessor.Create(OpCodes.Ldstr, type.Name);
                         InsertBefore(ilProcessor, firstInst, newInst);
                         break;
-                    case ParameterType.MethodName:
+                    case DecoratorAttribute.PreActionParameterType.MethodName:
                         newInst = ilProcessor.Create(OpCodes.Ldstr, method.Name);
                         InsertBefore(ilProcessor, firstInst, newInst);
                         break;
-                    case ParameterType.ParameterValues:
-                        var paramLength = method.Parameters.Count + (method.IsStatic ? 0 : 1);
-                        for (byte i = 0; i < paramLength; i++)
+                    case DecoratorAttribute.PreActionParameterType.This:
+                        newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte)0);
+                        InsertBefore(ilProcessor, firstInst, newInst);
+                        break;
+                    case DecoratorAttribute.PreActionParameterType.ParameterValues:
+                        var preActionParamInfos = preAction.GetParameters();
+                        var preActionParamLength = preActionParamInfos.Length - preActionEnumParams.Length + 1;
+                        var isStaticMethod = method.IsStatic;
+
+                        for (var i = 0; i < preActionParamLength; i++)
                         {
-                            newInst = ilProcessor.Create(OpCodes.Ldarg_S, i);
+                            // if method.IsStatic first of stack is 'this'
+                            var argIndex = i + (isStaticMethod ? 0 : 1);
+                            if (preActionParamInfos[i].ParameterType.IsByRef)
+                            {
+                                newInst = ilProcessor.Create(OpCodes.Ldarga_S, (byte)argIndex);
+                            }
+                            else
+                            {
+                                newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte)argIndex);
+                            }
+
                             InsertBefore(ilProcessor, firstInst, newInst);
                         }
 
@@ -141,18 +157,10 @@ namespace UnityDecoratorAttribute
 
             newInst = ilProcessor.Create(OpCodes.Call, preActionRef);
             InsertBefore(ilProcessor, firstInst, newInst);
-            newInst = ilProcessor.Create(OpCodes.Nop);
-            InsertBefore(ilProcessor, firstInst, newInst);
 
             ComputeOffsets(method.Body);
 
             // Debug.Log("Inject " + type.Name + "::" + method.Name);
-        }
-
-        public static void Inject()
-        {
-            if (EditorApplication.isCompiling || Application.isPlaying)
-                return;
         }
 
         private static Instruction InsertBefore(ILProcessor ilProcessor, Instruction target, Instruction instruction)
