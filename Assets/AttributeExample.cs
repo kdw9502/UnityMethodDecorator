@@ -6,12 +6,14 @@ using UnityDecoratorAttribute;
 using UnityEditor;
 #endif
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class AttributeExample : MonoBehaviour
 {
     [ZeroParameterLog]
     private void Start()
     {
+        
         Clamp(-99);        
     }
     
@@ -41,10 +43,10 @@ public class AttributeExample : MonoBehaviour
     {
         int returnValue = 2;
         Debug.Log(returnValue);
-        Clamp(b);
+        
         return returnValue;
     }
-    [LogThis]
+    [ClampParameterInt(0, 100)]
     private void Clamp(int a)
     {
         

@@ -15,6 +15,7 @@ public abstract class DecoratorAttribute : Attribute
         MethodName,
         This,
         ParameterValues,
+        AttributeValues,
     }
 }
 

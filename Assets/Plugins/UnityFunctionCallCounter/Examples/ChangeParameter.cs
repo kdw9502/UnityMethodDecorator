@@ -4,14 +4,18 @@ using UnityEngine.Scripting;
 
 namespace UnityDecoratorAttribute
 {
-    public class ClampPercentageAttribute: DecoratorAttribute
+    public class ClampParameterInt: DecoratorAttribute
     {
-        [Preserve]
-        public static void PreAction(ref int param)
+        public ClampParameterInt(int min, int max)
         {
-            param = Math.Clamp(param, 0, 100);
+        }
+        
+        [Preserve]
+        public static void PreAction(ref int param, int min, int max)
+        {
+            param = Math.Clamp(param, min, max);
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[] {PreActionParameterType.ParameterValues};
+        public static PreActionParameterType[] ParameterTypes => new[] {PreActionParameterType.ParameterValues, PreActionParameterType.AttributeValues};
     }
 }
