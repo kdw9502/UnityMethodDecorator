@@ -1,5 +1,5 @@
 ﻿using UnityEditor;
-
+#if UNITY_EDITOR
 namespace UnityDecoratorAttribute
 {
     public class EditorMenu
@@ -7,7 +7,9 @@ namespace UnityDecoratorAttribute
         [MenuItem("UnityMethodCallCounter/Inject Dll")]
         public static void Inject()
         {
-            ILInjector.InjectAll();        
+            ILInjector.ForceInjectAll();        
         }
     }
 }
+
+#endif

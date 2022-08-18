@@ -1,19 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-firstpass", "Assembly-CSharp-firstpass.csproj", "{aa16b884-c949-45db-afa5-7b1b372af645}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityDecoratorAttribute", "UnityDecoratorAttribute.csproj", "{fabff56f-e2fa-0000-7208-d447c0225094}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{a6a1263c-3cfc-ce73-9fdc-d7e0b8654fc3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests.csproj", "{364c0951-4af0-8e48-cd92-1fdedbb30abf}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{aa16b884-c949-45db-afa5-7b1b372af645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{aa16b884-c949-45db-afa5-7b1b372af645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{fabff56f-e2fa-0000-7208-d447c0225094}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{fabff56f-e2fa-0000-7208-d447c0225094}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{a6a1263c-3cfc-ce73-9fdc-d7e0b8654fc3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{a6a1263c-3cfc-ce73-9fdc-d7e0b8654fc3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{364c0951-4af0-8e48-cd92-1fdedbb30abf}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{364c0951-4af0-8e48-cd92-1fdedbb30abf}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

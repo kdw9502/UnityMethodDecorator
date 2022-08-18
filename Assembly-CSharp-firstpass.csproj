@@ -41,13 +41,13 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\DecoratorAttribute.cs" />
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\Examples\ChangeParameter.cs" />
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\MonoCecilExtensions.cs" />
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\EditorMenu.cs" />
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\ILInjector.cs" />
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\Examples\CallLog.cs" />
-     <Compile Include="Assets\Plugins\UnityFunctionCallCounter\Examples\CallCounter.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\DecoratorAttribute.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\ChangeParameter.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\MonoCecilExtensions.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\EditorMenu.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\ILInjector.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\CallLog.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\CallCounter.cs" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.5f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

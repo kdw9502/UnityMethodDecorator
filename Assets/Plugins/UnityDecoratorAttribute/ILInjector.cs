@@ -19,18 +19,24 @@ namespace UnityDecoratorAttribute
 {
 //https://programmer.group/use-mono.cecil-to-inject-code-into-dll-in-unity.html
 //https://www.reddit.com/r/csharp/comments/5qtpso/using_monocecil_in_c_with_unity/
-    public class ILInjector
+    public static class ILInjector
     {
         private static bool isInjected = false;
         private const int INJECTION_NOP_COUNT = 3;
-
+        private static string[] injectAssemblies = {"Assembly-CSharp.dll", "Tests.dll"};
+        
+        static readonly char sep = Path.DirectorySeparatorChar;
+        static string assemblyDirectoryPath = Application.dataPath + sep + ".." + sep + "Library" + sep + "ScriptAssemblies" + sep;
         [PostProcessBuild(1000)]
         private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
         {
-            isInjected = false;
+            var dllPath = buildPath.Replace(".exe", $"_Data{sep}Managed{sep}");
+            if (Directory.Exists(dllPath))
+                assemblyDirectoryPath = dllPath;
+            ForceInjectAll();
         }
 
-
+        [UnityEditor.Callbacks.PostProcessScene]
         [InitializeOnLoadMethod]
         // [PostProcessScene]
         public static void AutoInject()
@@ -43,16 +49,32 @@ namespace UnityDecoratorAttribute
             Debug.Log($"Inject Elapsed : {stopwatch.ElapsedMilliseconds:0}ms");
         }
 
+        public static void ForceInjectAll()
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            isInjected = false;
+            InjectAll();
+            Debug.Log($"Inject Elapsed : {stopwatch.ElapsedMilliseconds:0}ms");
 
-        public static void InjectAll()
+        }
+
+        private static void InjectAll()
         {
             if (isInjected)
                 return;
             isInjected = true;
 
-            var sep = Path.DirectorySeparatorChar;
-            var assemblyPath = Application.dataPath + sep + ".." + sep + "Library" + sep + "ScriptAssemblies" + sep +
-                               "Assembly-CSharp.dll";
+            foreach (var assembly in injectAssemblies)
+            {
+                var fullPath = assemblyDirectoryPath + assembly;
+                if (File.Exists(fullPath))
+                    InjectAssembly(fullPath);
+            }
+
+        }
+
+        private static void InjectAssembly(string assemblyPath)
+        {
             using var assemblyDefinition =
                 AssemblyDefinition.ReadAssembly(assemblyPath, new ReaderParameters {ReadWrite = true});
             var types = assemblyDefinition.MainModule.GetTypes();
@@ -287,31 +309,45 @@ namespace UnityDecoratorAttribute
                 {
                     var val = constructorArgument.Value;
                     var argumentType = constructorArgument.Type.GetMonoType();
-                    if (argumentType == typeof(string))
-                    {
-                        newInst = ilProcessor.Create(OpCodes.Ldstr, (string) val);
-                        InsertBefore(ilProcessor, target, newInst);
-                    }
-                    else if (argumentType == typeof(int))
-                    {
-                        newInst = ilProcessor.Create(OpCodes.Ldc_I4, (int) val);
-                        InsertBefore(ilProcessor, target, newInst);
-                    }
-                    else if (argumentType == typeof(float))
-                    {
-                        newInst = ilProcessor.Create(OpCodes.Ldc_R4, (float) val);
-                        InsertBefore(ilProcessor, target, newInst);
-                    }
-                    else if (argumentType == typeof(double))
-                    {
-                        newInst = ilProcessor.Create(OpCodes.Ldc_R8, (float) val);
-                        InsertBefore(ilProcessor, target, newInst);
-                    }
-                    else if (argumentType == typeof(bool))
-                    {
-                        newInst = ilProcessor.Create(OpCodes.Ldc_I4, (bool) val ? 1 : 0);
-                        InsertBefore(ilProcessor, target, newInst);
-                    }
+                    InsertValueToArgument(val, argumentType, target);
+                }
+            }
+
+            private void InsertValueToArgument(object val, Type argumentType, Instruction target)
+            {
+                if (argumentType == typeof(string))
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldstr, (string) val);
+                    InsertBefore(ilProcessor, target, newInst);
+                }
+                else if (argumentType == typeof(int))
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldc_I4, (int) val);
+                    InsertBefore(ilProcessor, target, newInst);
+                }
+                else if (argumentType == typeof(long))
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldc_I8, (long) val);
+                    InsertBefore(ilProcessor, target, newInst);
+                }
+                else if (argumentType == typeof(float))
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldc_R4, (float) val);
+                    InsertBefore(ilProcessor, target, newInst);
+                }
+                else if (argumentType == typeof(double))
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldc_R8, (float) val);
+                    InsertBefore(ilProcessor, target, newInst);
+                }
+                else if (argumentType == typeof(bool))
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldc_I4, (bool) val ? 1 : 0);
+                    InsertBefore(ilProcessor, target, newInst);
+                }
+                else
+                {
+                    Debug.LogError($"{type} parameter is not supported for UnityDecoratorAttribute");
                 }
             }
 

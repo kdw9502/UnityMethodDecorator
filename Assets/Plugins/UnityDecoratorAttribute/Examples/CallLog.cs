@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 
 namespace UnityDecoratorAttribute
 {
-    public class ZeroParameterLogAttribute : DecoratorAttribute
+    public class CallLogAttribute : DecoratorAttribute
     {
         [Preserve]
         public static void PreAction(string className, string methodName)
