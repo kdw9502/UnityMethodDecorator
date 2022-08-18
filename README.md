@@ -1,3 +1,7 @@
+# WIP
+
+currently not fully implemented and tested
+
 # UnityDecoratorAttribute
 
 Python style decorator (add action to method with attribute) implement using dll injection.
