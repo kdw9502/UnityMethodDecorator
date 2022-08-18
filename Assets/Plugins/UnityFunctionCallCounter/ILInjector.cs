@@ -68,10 +68,18 @@ namespace UnityDecoratorAttribute
                         continue;
 
                     var methodInjector = new MethodInjector(type, method, decoratorAttribute, assemblyDefinition);
-                    methodInjector.Run();
+                    methodInjector.InsertPreAction();
+                    methodInjector.InsertPostAction();
                 }
             }
 
+            foreach (var searchPath in AppDomain.CurrentDomain.GetAssemblies()
+                         .Select(asm => Path.GetDirectoryName(asm.ManifestModule.FullyQualifiedName))
+                         .Where(path => !string.IsNullOrEmpty(path)).Distinct())
+            {
+                ((BaseAssemblyResolver)assemblyDefinition.MainModule.AssemblyResolver).AddSearchDirectory(searchPath);
+            }
+            
             assemblyDefinition.Write();
         }
 
@@ -83,10 +91,12 @@ namespace UnityDecoratorAttribute
             private AssemblyDefinition assemblyDefinition;
 
             private MethodInfo preAction;
-            private DecoratorAttribute.PreActionParameterType[] preActionEnumParams;
             private Instruction newInst;
             private ILProcessor ilProcessor;
             private Instruction firstInst;
+            
+            private MethodInfo postAction;
+            private Instruction lastInst;
 
             public MethodInjector(TypeDefinition type, MethodDefinition method, CustomAttribute attribute,
                 AssemblyDefinition assemblyDefinition)
@@ -95,9 +105,13 @@ namespace UnityDecoratorAttribute
                 this.method = method;
                 this.attribute = attribute;
                 this.assemblyDefinition = assemblyDefinition;
+                
+                
+                ilProcessor = method.Body.GetILProcessor();
+                firstInst = method.Body.Instructions.First();
             }
 
-            public void Run()
+            public void InsertPreAction()
             {
                 var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
                                   BindingFlags.FlattenHierarchy;
@@ -105,23 +119,20 @@ namespace UnityDecoratorAttribute
                 preAction = attributeType.GetMethod("PreAction", bindingFlag);
                 if (preAction == null)
                 {
-                    Debug.LogError($"{attribute.AttributeType.Name} doesn't have PreAction method");
+                    // Debug.LogError($"{attribute.AttributeType.Name} doesn't have PreAction method");
                     return;
                 }
 
-                preActionEnumParams =
+                var preActionEnumParams =
                     attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as
                         DecoratorAttribute.PreActionParameterType[] ??
                     new DecoratorAttribute.PreActionParameterType[] { };
 
                 var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
 
-                ilProcessor = method.Body.GetILProcessor();
-                firstInst = method.Body.Instructions.First();
-
                 if (method.Body.Instructions.Count >= INJECTION_NOP_COUNT)
                 {
-                    if (method.Body.Instructions.Take(3).All(inst => inst.OpCode == OpCodes.Nop))
+                    if (method.Body.Instructions.Take(3).All(inst => inst.OpCode.Code == Code.Nop))
                     {
                         // Debug.Log("Already Injected " + type.Name + "::" + method.Name);
                         return;
@@ -152,10 +163,10 @@ namespace UnityDecoratorAttribute
                             InsertBefore(ilProcessor, firstInst, newInst);
                             break;
                         case DecoratorAttribute.PreActionParameterType.ParameterValues:
-                            InsertParameterValues();
+                            InsertParameterValuesArguments();
                             break;
                         case DecoratorAttribute.PreActionParameterType.AttributeValues:
-                            InsertAttributeValues();
+                            InsertAttributeValuesArguments(firstInst);
                             break;
                     }
                 }
@@ -166,7 +177,79 @@ namespace UnityDecoratorAttribute
                 ComputeOffsets(method.Body);
             }
 
-            private void InsertParameterValues()
+            public void InsertPostAction()
+            {
+                var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
+                                  BindingFlags.FlattenHierarchy;
+                var attributeType = attribute.AttributeType.GetMonoType();
+                postAction = attributeType.GetMethod("PostAction", bindingFlag);
+                if (postAction == null)
+                {
+                    // Debug.Log($"{attribute.AttributeType.Name} doesn't have PostAction method");
+                    return;
+                }
+
+                var postActionEnumParams =
+                    attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as
+                        DecoratorAttribute.PostActionParameterType[] ??
+                    new DecoratorAttribute.PostActionParameterType[] { };
+
+                var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
+
+                if (method.Body.Instructions.Count >= INJECTION_NOP_COUNT)
+                {
+                    if (method.Body.Instructions.TakeLast(3).All(inst => inst.OpCode.Code == Code.Nop))
+                    {
+                        return;
+                    }
+                }
+                
+                ilProcessor = method.Body.GetILProcessor();
+                lastInst = method.Body.Instructions.Last();
+
+
+                var localVarCount = method.Body.Variables.Count;
+                byte returnValueIndex = (byte)(localVarCount - 1);
+                
+                // To Check Injection, Insert 3 nop  
+                for (int i = 0; i < INJECTION_NOP_COUNT; i++)
+                {
+                    newInst = ilProcessor.Create(OpCodes.Nop);
+                    InsertAfter(ilProcessor, lastInst, newInst);
+                }
+
+                foreach (var parameter in postActionEnumParams)
+                {
+                    switch (parameter)
+                    {
+                        case DecoratorAttribute.PostActionParameterType.ClassName:
+                            newInst = ilProcessor.Create(OpCodes.Ldstr, type.Name);
+                            InsertBefore(ilProcessor, lastInst, newInst);
+                            break;
+                        case DecoratorAttribute.PostActionParameterType.MethodName:
+                            newInst = ilProcessor.Create(OpCodes.Ldstr, method.Name);
+                            InsertBefore(ilProcessor, lastInst, newInst);
+                            break;
+                        case DecoratorAttribute.PostActionParameterType.This:
+                            newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) 0);
+                            InsertBefore(ilProcessor, lastInst, newInst);
+                            break;
+                        case DecoratorAttribute.PostActionParameterType.ReturnValues: 
+                            InsertReturnValueArguments(returnValueIndex);
+                            break;
+                        case DecoratorAttribute.PostActionParameterType.AttributeValues:
+                            InsertAttributeValuesArguments(lastInst);
+                            break;
+                    }
+                }
+
+                newInst = ilProcessor.Create(OpCodes.Call, preActionRef);
+                InsertBefore(ilProcessor, firstInst, newInst);
+
+                ComputeOffsets(method.Body);
+            }
+
+            private void InsertParameterValuesArguments()
             {
                 var preActionParamInfos = preAction.GetParameters();
                 var targetMethodParamLength = method.Parameters.Count;
@@ -187,10 +270,17 @@ namespace UnityDecoratorAttribute
 
                     InsertBefore(ilProcessor, firstInst, newInst);
                 }
-
             }
 
-            private void InsertAttributeValues()
+            private void InsertReturnValueArguments(byte returnValueIndex)
+            {
+                newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
+                InsertBefore(ilProcessor, lastInst, newInst);
+                newInst = ilProcessor.Create(OpCodes.Ldarg_S, returnValueIndex);
+                InsertBefore(ilProcessor, lastInst, newInst);
+            }
+
+            private void InsertAttributeValuesArguments(Instruction target)
             {
                 var constructorArguments = attribute.ConstructorArguments;
                 foreach (var constructorArgument in constructorArguments)
@@ -200,27 +290,27 @@ namespace UnityDecoratorAttribute
                     if (argumentType == typeof(string))
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldstr, (string) val);
-                        InsertBefore(ilProcessor, firstInst, newInst);
+                        InsertBefore(ilProcessor, target, newInst);
                     }
                     else if (argumentType == typeof(int))
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldc_I4, (int) val);
-                        InsertBefore(ilProcessor, firstInst, newInst);
+                        InsertBefore(ilProcessor, target, newInst);
                     }
                     else if (argumentType == typeof(float))
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldc_R4, (float) val);
-                        InsertBefore(ilProcessor, firstInst, newInst);
+                        InsertBefore(ilProcessor, target, newInst);
                     }
                     else if (argumentType == typeof(double))
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldc_R8, (float) val);
-                        InsertBefore(ilProcessor, firstInst, newInst);
+                        InsertBefore(ilProcessor, target, newInst);
                     }
                     else if (argumentType == typeof(bool))
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldc_I4, (bool) val ? 1 : 0);
-                        InsertBefore(ilProcessor, firstInst, newInst);
+                        InsertBefore(ilProcessor, target, newInst);
                     }
                 }
             }

@@ -44,12 +44,17 @@ public class AttributeExample : MonoBehaviour
         int returnValue = 2;
         Debug.Log(returnValue);
         
-        return returnValue;
+        return Clamp(returnValue);
     }
     [ClampParameterInt(0, 100)]
-    private void Clamp(int a)
+    private int Clamp(int a)
     {
         
         Debug.Log(a);
+        return a;
+    }
+    private int Clamp2(int a)
+    {
+        return a;
     }
 }
