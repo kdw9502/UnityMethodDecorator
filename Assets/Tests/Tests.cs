@@ -1,9 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityDecoratorAttribute;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
+using Debug = UnityEngine.Debug;
 
 public class Tests
 {
@@ -34,8 +38,18 @@ public class Tests
         {
         }
         [TwoParameterLog]
-        public void TwoParamLog(string str, float _float)
+        public void TwoParamLog(string str, object obj)
         {
+        }
+        [Performance]
+        public void PerformanceParamTest()
+        {
+            Thread.Sleep(1000);
+        }
+
+        public async Task AsyncTest()
+        {
+            await Task.Delay(1000);
         }
     }   
     
@@ -86,5 +100,16 @@ public class Tests
         Assert.AreEqual(100, val);
         yield return null;
     }
-
+    [UnityTest]
+    public IEnumerator PerformanceParamTest()
+    {
+        var stopWatch = Stopwatch.StartNew();
+        var testClass = new TestClass();
+        
+        testClass.PerformanceParamTest();
+        var executionTime = Performance.GetExecutionTime(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
+        Debug.Log($"exe {executionTime} stop {stopWatch.ElapsedMilliseconds}");
+        Assert.AreApproximatelyEqual(executionTime, stopWatch.ElapsedMilliseconds, 30);
+        yield return null;
+    }
 }

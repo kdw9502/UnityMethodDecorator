@@ -146,7 +146,7 @@ namespace UnityDecoratorAttribute
                 }
 
                 var preActionEnumParams =
-                    attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as
+                    attributeType.GetProperty("PreActionParameterTypes", bindingFlag)?.GetValue(null) as
                         DecoratorAttribute.PreActionParameterType[] ??
                     new DecoratorAttribute.PreActionParameterType[] { };
 
@@ -212,11 +212,11 @@ namespace UnityDecoratorAttribute
                 }
 
                 var postActionEnumParams =
-                    attributeType.GetProperty("ParameterTypes", bindingFlag)?.GetValue(null) as
+                    attributeType.GetProperty("PostActionParameterTypes", bindingFlag)?.GetValue(null) as
                         DecoratorAttribute.PostActionParameterType[] ??
                     new DecoratorAttribute.PostActionParameterType[] { };
 
-                var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
+                var postActionRef = assemblyDefinition.MainModule.ImportReference(postAction);
 
                 if (method.Body.Instructions.Count >= INJECTION_NOP_COUNT)
                 {
@@ -265,8 +265,8 @@ namespace UnityDecoratorAttribute
                     }
                 }
 
-                newInst = ilProcessor.Create(OpCodes.Call, preActionRef);
-                InsertBefore(ilProcessor, firstInst, newInst);
+                newInst = ilProcessor.Create(OpCodes.Call, postActionRef);
+                InsertBefore(ilProcessor, lastInst, newInst);
 
                 ComputeOffsets(method.Body);
             }

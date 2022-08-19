@@ -15,7 +15,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName}");
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
+        public static PreActionParameterType[] PreActionParameterTypes => new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
     }
 
 
@@ -27,7 +27,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName} param: {param1}");
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[]
+        public static PreActionParameterType[] PreActionParameterTypes => new[]
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
     }
 
@@ -40,7 +40,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}");
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[]
+        public static PreActionParameterType[] PreActionParameterTypes => new[]
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
     }
 
@@ -52,7 +52,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}, {param3}");
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[]
+        public static PreActionParameterType[] PreActionParameterTypes => new[]
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
     }
 
@@ -66,7 +66,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}, {param3}, {param4}");
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[]
+        public static PreActionParameterType[] PreActionParameterTypes => new[]
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
     }
 
@@ -78,7 +78,7 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{@this} {className}::{methodName}");
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[]
+        public static PreActionParameterType[] PreActionParameterTypes => new[]
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.This};
     }
 }

@@ -16,6 +16,6 @@ namespace UnityDecoratorAttribute
             param = Math.Clamp(param, min, max);
         }
 
-        public static PreActionParameterType[] ParameterTypes => new[] {PreActionParameterType.ParameterValues, PreActionParameterType.AttributeValues};
+        public static PreActionParameterType[] PreActionParameterTypes => new[] {PreActionParameterType.ParameterValues, PreActionParameterType.AttributeValues};
     }
 }
