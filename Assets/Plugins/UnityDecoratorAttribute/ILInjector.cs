@@ -285,6 +285,12 @@ namespace UnityDecoratorAttribute
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldarga_S, (byte) argIndex);
                     }
+                    else if (!preActionParamInfos[i].ParameterType.IsPrimitive && method.Parameters[i].ParameterType.IsPrimitive)
+                    {
+                        newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) argIndex);
+                        InsertBefore(ilProcessor, firstInst, newInst);
+                        newInst = ilProcessor.Create(OpCodes.Box, method.Parameters[i].ParameterType);
+                    }
                     else
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) argIndex);
