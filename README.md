@@ -1,73 +1,104 @@
 # WIP
 
-currently not fully implemented and tested
+currently not fully implemented and tested.
 
 # UnityDecoratorAttribute
 
-Python style decorator (add action to method with attribute) implement using dll injection.
+Python style decorator, which is add action to method with attribute, implement using dll injection.
 
-## Installing
+By adding DecoratorAttribute to method, you can execute custom actions on beginning of method and end of method.
 
-[Download package](https://github.com/kdw9502/UnityDecoratorAttribute/releases/download/2.0.0/UnityDecoratorAttribute.unitypackage) and import to your Unity project.
+## Install
+
+[Download package](https://github.com/kdw9502/UnityDecoratorAttribute/releases) and import to your Unity project.
 
 ## Usage
 
-### Parameter Logging
+### PreDefined Example Attributes
+[ClampParameterInt, ClampParameterFloat](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp first parameter value.
+
+[ClampReturnInt, ClampReturnFloat](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp return value.
+
+[LogThis](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Call `Debug.Log($"{this} {className}::{methodName}")` on target method called.
+
+[OneParameterLogAttribute ~ FourParameterLogAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values.
+
+[CallCount](Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Store the number of target method calls and get count by `CallCounter.GetMethodCallCount(className, methodName)`
+
+etc.
+
+### Make Custom attribute
+
+Create Attribute inherit UnityDecoratorAttribute.DecoratorAttribute
+```c#
+public class ExampleAttribute : DecoratorAttribute
+{
+}
+```
+
+### PreAction 
+
+PreAction is always called when target method is called.
+
+#### Define
+
+Define method `public static void PreAction` Attribute. 
+
+If your PreAction needs parameter, Define field `public static PreActionParameterType[] PreActionParameterTypes`
 
 ```c#
-using UnityDecoratorAttribute;
-public class AttributeExample : MonoBehaviour
+public class ExampleAttribute : DecoratorAttribute
 {
-    [ZeroParameterLog]
-    private void Start()
+    [Preserve]
+    public static void PreAction(string className, string methodName)
     {
-        ParameterLogExample("test a", "test b");
+        Debug.Log($"{className}::{methodName}");
     }
 
-    [TwoParameterLog]
-    private void ParameterLogExample(string a, string b)
-    {
-    }
+    public static PreActionParameterType[] PreActionParameterTypes => 
+        new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
 }
 ```
-Add `(Zero~Four)ParameterLogAttribute` to target method. 
 
-To log static method, use `Static(Zero~Four)ParameterLogAttribute` instead.
 
-### Result
-
-![image](https://user-images.githubusercontent.com/21076531/184547089-a75fba5b-e9e7-4131-af9f-54dbcbd0fe51.png)
-
-If you want to use custom format, edit ParameterLogAttribute::PreAction() or create attribute with same static method.
-
-### Method Call Count
-
+PreAction can use following parameters.
 ```c#
-[CallCount]
-private void Update()
+public enum PreActionParameterType
 {
+    ClassName,
+    MethodName,
+    This,  // Target Method's Instance
+    ParameterValues, // Target Method's Parmeter Values
+    AttributeValues, // Attribute values
 }
 ```
-Add `CallCountAttribute` to target method.
 
-```c#
-static void GetUpdateCallCount()
+
+### PostAction 
+
+PostAction is called before target method return.
+
+#### Define
+
+Define method `public static void PostAction` Attribute. 
+
+If your PostAction needs parameter, Define field `public static PostActionParameterType[] PostActionParameterTypes`
+
+PostAction can use following parameters.
+```
+public enum PostActionParameterType
 {
-    int callCount = CallCounter.GetMethodCallCount(nameof(AttributeExample), nameof(Update));
-    Debug.Log($"Update Call Count : {callCount}");
+    ClassName,
+    MethodName,
+    This,
+    ReturnValue,
+    AttributeValues,
 }
 ```
-To get number of method calls, call `CallCounter.GetMethodCallCount(className, methodName)`
-
-### Result
-
-![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png)
-
 
 ## Limitation
-Currently only support for method in [Assembly-CSharp.dll](https://docs.unity3d.com/2019.4/Documentation/Manual/ScriptCompilationAssemblyDefinitionFiles.html)
 
-Not support for ref parameter.
+Not support for async methods.
 
 ## License
 
