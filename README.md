@@ -85,7 +85,7 @@ Define method `public static void PostAction` Attribute.
 If your PostAction needs parameter, Define field `public static PostActionParameterType[] PostActionParameterTypes`
 
 PostAction can use following parameters.
-```
+```c#
 public enum PostActionParameterType
 {
     ClassName,
