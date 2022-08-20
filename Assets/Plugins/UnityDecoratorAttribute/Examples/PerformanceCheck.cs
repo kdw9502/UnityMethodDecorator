@@ -6,7 +6,7 @@ using Debug = UnityEngine.Debug;
 
 namespace UnityDecoratorAttribute
 {
-    public static class Performance
+    public static class PerformanceCheck
     {
         private static Stopwatch stopwatch = new Stopwatch();
         private static Dictionary<string, long> executionTime = new();
@@ -28,12 +28,12 @@ namespace UnityDecoratorAttribute
         }
     }
 
-    public class PerformanceAttribute : DecoratorAttribute
+    public class PerformanceCheckAttribute : DecoratorAttribute
     {
         [Preserve]
         public static void PreAction(string className, string methodName)
         {
-            Performance.Start($"{className}::{methodName}");
+            PerformanceCheck.Start($"{className}::{methodName}");
         }
 
         public static PreActionParameterType[] PreActionParameterTypes => new[]
@@ -42,7 +42,7 @@ namespace UnityDecoratorAttribute
         [Preserve]
         public static void PostAction()
         {
-            Performance.End();
+            PerformanceCheck.End();
         }
 
         public static PostActionParameterType[] PostActionParameterTypes => new PostActionParameterType[]{};

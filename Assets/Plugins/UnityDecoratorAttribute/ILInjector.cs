@@ -240,6 +240,12 @@ namespace UnityDecoratorAttribute
                     InsertAfter(ilProcessor, lastInst, newInst);
                 }
 
+                if (method.ReturnType.Name != "Void")
+                {
+                    newInst = ilProcessor.Create(OpCodes.Stloc_S, returnValueIndex);
+                    InsertBefore(ilProcessor, lastInst, newInst);
+                }
+                
                 foreach (var parameter in postActionEnumParams)
                 {
                     switch (parameter)
@@ -256,7 +262,7 @@ namespace UnityDecoratorAttribute
                             newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) 0);
                             InsertBefore(ilProcessor, lastInst, newInst);
                             break;
-                        case DecoratorAttribute.PostActionParameterType.ReturnValues: 
+                        case DecoratorAttribute.PostActionParameterType.ReturnValue: 
                             InsertReturnValueArguments(returnValueIndex);
                             break;
                         case DecoratorAttribute.PostActionParameterType.AttributeValues:
@@ -303,8 +309,6 @@ namespace UnityDecoratorAttribute
             private void InsertReturnValueArguments(byte returnValueIndex)
             {
                 newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
-                InsertBefore(ilProcessor, lastInst, newInst);
-                newInst = ilProcessor.Create(OpCodes.Ldarg_S, returnValueIndex);
                 InsertBefore(ilProcessor, lastInst, newInst);
             }
 

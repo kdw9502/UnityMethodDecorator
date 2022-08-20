@@ -15,7 +15,8 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName}");
         }
 
-        public static PreActionParameterType[] PreActionParameterTypes => new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
+        public static PreActionParameterType[] PreActionParameterTypes => 
+            new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
     }
 
 

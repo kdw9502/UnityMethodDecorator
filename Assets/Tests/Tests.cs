@@ -27,11 +27,23 @@ namespace UnityDecoratorAttribute.Tests
             }
 
             [ClampParameterInt(0, 100)]
-            public int Clamp0to100(int arg)
+            public int ClampParam0to100(int arg)
             {
                 return arg;
             }
+            
+            [ClampReturnInt(0, 100)]
+            public int ClampReturn0to100(int arg)
+            {
+                return arg;
+            }
+            
+            [ClampReturnInt(0, 100)]
 
+            public int Return1001()
+            {
+                return 1002;
+            }
 
             public void TwoParamLog()
             {
@@ -47,13 +59,13 @@ namespace UnityDecoratorAttribute.Tests
             {
             }
 
-            [Performance]
+            [PerformanceCheck]
             public void PerformanceParamTest()
             {
                 Thread.Sleep(1000);
             }
 
-            [Performance]
+            [PerformanceCheck]
             public async Task AsyncTest()
             {
                 Debug.Log("test");
@@ -104,15 +116,29 @@ namespace UnityDecoratorAttribute.Tests
         public IEnumerator ClampParamTest()
         {
             var testClass = new TestClass();
-            var val = testClass.Clamp0to100(-88);
+            var val = testClass.ClampParam0to100(-88);
             Assert.AreEqual(0, val);
-            val = testClass.Clamp0to100(999);
+            val = testClass.ClampParam0to100(999);
             Assert.AreEqual(100, val);
-            val = testClass.Clamp0to100(10);
+            val = testClass.ClampParam0to100(10);
             Assert.AreEqual(10, val);
             yield return null;
         }
-
+        
+        [UnityTest]
+        public IEnumerator ClampReturnTest()
+        {
+            var testClass = new TestClass();
+            var val = testClass.ClampReturn0to100(-88);
+            Assert.AreEqual(0, val);
+            val = testClass.ClampReturn0to100(999);
+            Assert.AreEqual(100, val);
+            val = testClass.ClampReturn0to100(10);
+            Assert.AreEqual(10, val);
+            val = testClass.Return1001();
+            Assert.AreEqual(100, val);
+            yield return null;
+        }
         [UnityTest]
         public IEnumerator PerformanceParamTest()
         {
@@ -120,7 +146,7 @@ namespace UnityDecoratorAttribute.Tests
             var testClass = new TestClass();
 
             testClass.PerformanceParamTest();
-            var executionTime = Performance.GetExecutionTime(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
+            var executionTime = PerformanceCheck.GetExecutionTime(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
             Debug.Log($"exe {executionTime} stop {stopWatch.ElapsedMilliseconds}");
             Assert.AreApproximatelyEqual(executionTime, stopWatch.ElapsedMilliseconds, 30);
             yield return null;

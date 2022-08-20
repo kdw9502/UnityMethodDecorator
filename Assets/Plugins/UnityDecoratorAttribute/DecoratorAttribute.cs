@@ -1,25 +1,26 @@
 using System;
 
-
-[AttributeUsage(AttributeTargets.Method)]
-public abstract class DecoratorAttribute : Attribute
+namespace UnityDecoratorAttribute
 {
-    public enum PreActionParameterType
+    [AttributeUsage(AttributeTargets.Method)]
+    public abstract class DecoratorAttribute : Attribute
     {
-        ClassName,
-        MethodName,
-        This,
-        ParameterValues,
-        AttributeValues,
-    }
-    
-    public enum PostActionParameterType
-    {
-        ClassName,
-        MethodName,
-        This,
-        ReturnValues,
-        AttributeValues,
+        public enum PreActionParameterType
+        {
+            ClassName,
+            MethodName,
+            This,  // Target Method's Instance
+            ParameterValues, // Target Method's Parmeter Values
+            AttributeValues, // Attribute values
+        }
+
+        public enum PostActionParameterType
+        {
+            ClassName,
+            MethodName,
+            This,
+            ReturnValue,
+            AttributeValues,
+        }
     }
 }
-

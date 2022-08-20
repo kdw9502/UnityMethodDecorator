@@ -45,7 +45,7 @@
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\ChangeParameter.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\MonoCecilExtensions.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Editor\EditorMenu.cs" />
-     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\Performance.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\PerformanceCheck.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\ILInjector.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\CallLog.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\CallCounter.cs" />
