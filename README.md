@@ -14,23 +14,6 @@ By adding DecoratorAttribute to method, you can execute custom actions on beginn
 
 ## Usage
 
-### PreDefined Example Attributes
-[ClampParameterInt, ClampParameterFloat](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp first parameter value.
-
-[ClampReturnInt, ClampReturnFloat](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp return value.
-
-[LogThis](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Call `Debug.Log($"{this} {className}::{methodName}")` on target method called.
-
-[OneParameterLogAttribute ~ FourParameterLogAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values.
-
-![image](https://user-images.githubusercontent.com/21076531/184547089-a75fba5b-e9e7-4131-af9f-54dbcbd0fe51.png)
-
-[CallCount](Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Store the number of target method calls and get count by `CallCounter.GetMethodCallCount(className, methodName)`
-
-![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png)
-
-etc.
-
 ### Make Custom attribute
 
 Create Attribute inherit UnityDecoratorAttribute.DecoratorAttribute
@@ -99,6 +82,24 @@ public enum PostActionParameterType
     AttributeValues,
 }
 ```
+
+
+## PreDefined Example Attributes
+[ClampParameterInt, ClampParameterFloat](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp first parameter value.
+
+[ClampReturnInt, ClampReturnFloat](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp return value.
+
+[LogThis](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Call `Debug.Log($"{this} {className}::{methodName}")` on target method called.
+
+[OneParameterLogAttribute ~ FourParameterLogAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values.
+
+![image](https://user-images.githubusercontent.com/21076531/184547089-a75fba5b-e9e7-4131-af9f-54dbcbd0fe51.png)
+
+[CallCount](Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Store the number of target method calls and get count by `CallCounter.GetMethodCallCount(className, methodName)`
+
+![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png)
+
+etc.
 
 ## Limitation
 
