@@ -1,13 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 
 // https://stackoverflow.com/questions/4184384/mono-cecil-typereference-to-type
 public static class MonoCecilExtensions
 {
+    private static Dictionary<TypeReference, Type> cache = new();
     public static Type GetMonoType(this TypeReference type)
     {
-        return Type.GetType(type.GetReflectionName(), false);
+        var returnValue = cache.GetValueOrDefault(type) ?? Type.GetType(type.GetReflectionName(), false);
+        cache[type] = returnValue;
+        return returnValue;
     }
 
     private static string GetReflectionName(this TypeReference type)

@@ -23,10 +23,13 @@ namespace UnityDecoratorAttribute
     {
         private static bool isInjected = false;
         private const int INJECTION_NOP_COUNT = 3;
-        private static string[] injectAssemblies = {"Assembly-CSharp.dll", "Tests.dll"};
-        
+        public static string[] injectAssemblies = {"Assembly-CSharp.dll", "Tests.dll"};
+
         static readonly char sep = Path.DirectorySeparatorChar;
-        static string assemblyDirectoryPath = Application.dataPath + sep + ".." + sep + "Library" + sep + "ScriptAssemblies" + sep;
+
+        static string assemblyDirectoryPath =
+            Application.dataPath + sep + ".." + sep + "Library" + sep + "ScriptAssemblies" + sep;
+
         [PostProcessBuild(1000)]
         private static void OnPostprocessBuildPlayer(BuildTarget buildTarget, string buildPath)
         {
@@ -55,7 +58,6 @@ namespace UnityDecoratorAttribute
             isInjected = false;
             InjectAll();
             Debug.Log($"Inject Elapsed : {stopwatch.ElapsedMilliseconds:0}ms");
-
         }
 
         private static void InjectAll()
@@ -70,7 +72,6 @@ namespace UnityDecoratorAttribute
                 if (File.Exists(fullPath))
                     InjectAssembly(fullPath);
             }
-
         }
 
         private static void InjectAssembly(string assemblyPath)
@@ -99,9 +100,9 @@ namespace UnityDecoratorAttribute
                          .Select(asm => Path.GetDirectoryName(asm.ManifestModule.FullyQualifiedName))
                          .Where(path => !string.IsNullOrEmpty(path)).Distinct())
             {
-                ((BaseAssemblyResolver)assemblyDefinition.MainModule.AssemblyResolver).AddSearchDirectory(searchPath);
+                ((BaseAssemblyResolver) assemblyDefinition.MainModule.AssemblyResolver).AddSearchDirectory(searchPath);
             }
-            
+
             assemblyDefinition.Write();
         }
 
@@ -110,15 +111,20 @@ namespace UnityDecoratorAttribute
             private TypeDefinition type;
             private MethodDefinition method;
             private CustomAttribute attribute;
+            private Type attributeType;
             private AssemblyDefinition assemblyDefinition;
 
             private MethodInfo preAction;
+            private DecoratorAttribute.PreActionParameterType[] preActionEnumParams;
             private Instruction newInst;
             private ILProcessor ilProcessor;
             private Instruction firstInst;
-            
+
             private MethodInfo postAction;
             private Instruction lastInst;
+
+            private BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
+                                               BindingFlags.FlattenHierarchy;
 
             public MethodInjector(TypeDefinition type, MethodDefinition method, CustomAttribute attribute,
                 AssemblyDefinition assemblyDefinition)
@@ -127,47 +133,77 @@ namespace UnityDecoratorAttribute
                 this.method = method;
                 this.attribute = attribute;
                 this.assemblyDefinition = assemblyDefinition;
-                
-                
+
+                attributeType = attribute.AttributeType.GetMonoType();
                 ilProcessor = method.Body.GetILProcessor();
                 firstInst = method.Body.Instructions.First();
             }
 
-            public void InsertPreAction()
+            private void FindValidPreAction()
             {
-                var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
-                                  BindingFlags.FlattenHierarchy;
-                var attributeType = attribute.AttributeType.GetMonoType();
-                preAction = attributeType.GetMethod("PreAction", bindingFlag);
-                if (preAction == null)
-                {
-                    // Debug.LogError($"{attribute.AttributeType.Name} doesn't have PreAction method");
-                    return;
-                }
-
-                var preActionEnumParams =
+                preActionEnumParams =
                     attributeType.GetProperty("PreActionParameterTypes", bindingFlag)?.GetValue(null) as
-                        DecoratorAttribute.PreActionParameterType[] ??
-                    new DecoratorAttribute.PreActionParameterType[] { };
+                        DecoratorAttribute.PreActionParameterType[];
 
-                var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
+                if (preActionEnumParams == null)
+                    return;
 
-                if (method.Body.Instructions.Count >= INJECTION_NOP_COUNT)
+                var expectedParamTypes = new List<Type>();
+                foreach (var parameterType in preActionEnumParams)
                 {
-                    if (method.Body.Instructions.Take(3).All(inst => inst.OpCode.Code == Code.Nop))
+                    switch (parameterType)
                     {
-                        // Debug.Log("Already Injected " + type.Name + "::" + method.Name);
-                        return;
+                        case DecoratorAttribute.PreActionParameterType.ClassName:
+                            expectedParamTypes.Add(typeof(string));
+                            break;
+                        case DecoratorAttribute.PreActionParameterType.MethodName:
+                            expectedParamTypes.Add(typeof(string));
+                            break;
+                        case DecoratorAttribute.PreActionParameterType.This:
+                            expectedParamTypes.Add(type.GetMonoType());
+                            break;
+                        case DecoratorAttribute.PreActionParameterType.ParameterValues:
+                            expectedParamTypes.AddRange(method.Parameters.Select(param =>
+                                param.ParameterType.GetMonoType()));
+                            break;
+                        case DecoratorAttribute.PreActionParameterType.AttributeValues:
+                            expectedParamTypes.AddRange(
+                                attribute.Constructor.Parameters.Select(param => param.ParameterType.GetMonoType()));
+                            break;
                     }
                 }
 
-                // To Check Injection, Insert 3 nop  
-                for (int i = 0; i < INJECTION_NOP_COUNT; i++)
+                var methods = attributeType.GetMethods(bindingFlag);
+
+                foreach (var method in methods)
                 {
-                    newInst = ilProcessor.Create(OpCodes.Nop);
-                    InsertBefore(ilProcessor, firstInst, newInst);
+                    if (method.Name != "PreAction")
+                        continue;
+                    var methodParamTypes = method.GetParameters().Select(param => param.ParameterType).ToArray();
+                    if (methodParamTypes.Length != expectedParamTypes.Count)
+                        continue;
+                    bool allSame = methodParamTypes.Select((type, i) => type == expectedParamTypes[i] || 
+                                                                        type.IsAssignableFrom(expectedParamTypes[i]) || 
+                                                                        type.GetElementType() == expectedParamTypes[i])
+                        .All(x => x);
+
+                    if (allSame)
+                    {
+                        preAction = method;
+                        break;;
+                    }
                 }
 
+                if (preAction == null)
+                {
+                    Debug.Log($"Can't find appropriate {attributeType.Name} PreAction for {method.Name}. " +
+                              $"Expected : PreAction({string.Join(", ", expectedParamTypes.Select(type => type.Name))})");
+                }
+            }
+
+
+            private void InjectPreActionParameterLoadIL()
+            {
                 foreach (var parameter in preActionEnumParams)
                 {
                     switch (parameter)
@@ -192,18 +228,54 @@ namespace UnityDecoratorAttribute
                             break;
                     }
                 }
+            }
 
+            private void InjectPreActionCall()
+            {
+                var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
                 newInst = ilProcessor.Create(OpCodes.Call, preActionRef);
                 InsertBefore(ilProcessor, firstInst, newInst);
+            }
+
+            private void InjectNopForCheckInjected()
+            {
+                // To Check Injection, Insert 3 nop  
+
+                for (int i = 0; i < INJECTION_NOP_COUNT; i++)
+                {
+                    newInst = ilProcessor.Create(OpCodes.Nop);
+                    InsertBefore(ilProcessor, firstInst, newInst);
+                }
+            }
+
+            private bool IsAlreadyInjectPreAction()
+            {
+                if (method.Body.Instructions.Count < INJECTION_NOP_COUNT)
+                    return false;
+
+                return method.Body.Instructions.Take(3).All(inst => inst.OpCode.Code == Code.Nop);
+            }
+
+            public void InsertPreAction()
+            {
+                FindValidPreAction();
+                if (preAction == null)
+                {
+                    return;
+                }
+
+                if (IsAlreadyInjectPreAction())
+                    return;
+
+                InjectNopForCheckInjected();
+                InjectPreActionParameterLoadIL();
+                InjectPreActionCall();
 
                 ComputeOffsets(method.Body);
             }
 
             public void InsertPostAction()
             {
-                var bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
-                                  BindingFlags.FlattenHierarchy;
-                var attributeType = attribute.AttributeType.GetMonoType();
                 postAction = attributeType.GetMethod("PostAction", bindingFlag);
                 if (postAction == null)
                 {
@@ -225,14 +297,14 @@ namespace UnityDecoratorAttribute
                         return;
                     }
                 }
-                
+
                 ilProcessor = method.Body.GetILProcessor();
                 lastInst = method.Body.Instructions.Last();
 
 
                 var localVarCount = method.Body.Variables.Count;
-                byte returnValueIndex = (byte)(localVarCount - 1);
-                
+                byte returnValueIndex = (byte) (localVarCount - 1);
+
                 // To Check Injection, Insert 3 nop  
                 for (int i = 0; i < INJECTION_NOP_COUNT; i++)
                 {
@@ -245,7 +317,7 @@ namespace UnityDecoratorAttribute
                     newInst = ilProcessor.Create(OpCodes.Stloc_S, returnValueIndex);
                     InsertBefore(ilProcessor, lastInst, newInst);
                 }
-                
+
                 foreach (var parameter in postActionEnumParams)
                 {
                     switch (parameter)
@@ -262,7 +334,7 @@ namespace UnityDecoratorAttribute
                             newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) 0);
                             InsertBefore(ilProcessor, lastInst, newInst);
                             break;
-                        case DecoratorAttribute.PostActionParameterType.ReturnValue: 
+                        case DecoratorAttribute.PostActionParameterType.ReturnValue:
                             InsertReturnValueArguments(returnValueIndex);
                             break;
                         case DecoratorAttribute.PostActionParameterType.AttributeValues:
@@ -291,7 +363,8 @@ namespace UnityDecoratorAttribute
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldarga_S, (byte) argIndex);
                     }
-                    else if (!preActionParamInfos[i].ParameterType.IsPrimitive && method.Parameters[i].ParameterType.IsPrimitive)
+                    else if (!preActionParamInfos[i].ParameterType.IsPrimitive &&
+                             method.Parameters[i].ParameterType.IsPrimitive)
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) argIndex);
                         InsertBefore(ilProcessor, firstInst, newInst);
@@ -308,7 +381,21 @@ namespace UnityDecoratorAttribute
 
             private void InsertReturnValueArguments(byte returnValueIndex)
             {
-                newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
+                if (method.ReturnType.IsByReference)
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldloca_S, returnValueIndex);
+                }
+                // else if (!postAction.GetParameters() && method.ReturnType.IsPrimitive)
+                // {
+                //     newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
+                //     InsertBefore(ilProcessor, firstInst, newInst);
+                //     newInst = ilProcessor.Create(OpCodes.Box, method.ReturnType);
+                // }
+                else
+                {
+                    newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
+                }
+
                 InsertBefore(ilProcessor, lastInst, newInst);
             }
 

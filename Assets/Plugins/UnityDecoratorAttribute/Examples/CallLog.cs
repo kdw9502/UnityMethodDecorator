@@ -55,6 +55,18 @@ namespace UnityDecoratorAttribute
 
         public static PreActionParameterType[] PreActionParameterTypes => new[]
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
+
+        public int RefCompile()
+        {
+            var retval = 1;
+            Ref(ref retval);
+            return retval;
+        }
+
+        public void Ref(ref int test)
+        {
+            test = 2;
+        }
     }
 
 
@@ -71,7 +83,7 @@ namespace UnityDecoratorAttribute
             {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
     }
 
-    public class LogThis : DecoratorAttribute
+    public class LogThisAttribute : DecoratorAttribute
     {
         [Preserve]
         public static void PreAction(string className, string methodName, object @this)
