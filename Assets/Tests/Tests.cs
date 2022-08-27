@@ -37,13 +37,13 @@ namespace UnityDecoratorAttribute.Tests
                 return arg;
             }
             
-            [ClampReturnInt(0, 100)]
+            [ClampReturn(0, 100)]
             public int ClampReturn0to100(int arg)
             {
                 return arg;
             }
             
-            [ClampReturnInt(0, 100)]
+            [ClampReturn(0, 100)]
 
             public int Return1001()
             {

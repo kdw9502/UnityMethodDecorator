@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine.Scripting;
@@ -10,7 +11,7 @@ namespace UnityDecoratorAttribute
     public static class PerformanceCheck
     {
         private static Stopwatch stopwatch = new Stopwatch();
-        private static Dictionary<(string className, string methodName), long> totalExecutionTime = new();
+        private static Dictionary<(string className, string methodName), long> totalExecutionTicks = new();
         private static Dictionary<(string className, string methodName), long> executeCount = new();
         private static (string className, string methodName) currentMethod;
         public static void Start(string className, string methodName)
@@ -22,17 +23,21 @@ namespace UnityDecoratorAttribute
         public static void End()
         {
             executeCount[currentMethod] = executeCount.GetValueOrDefault(currentMethod) + 1;
-            totalExecutionTime[currentMethod] = totalExecutionTime.GetValueOrDefault(currentMethod) + stopwatch.ElapsedMilliseconds;
+            totalExecutionTicks[currentMethod] = totalExecutionTicks.GetValueOrDefault(currentMethod) + stopwatch.ElapsedTicks;
         }
 
         public static long GetTotalExecutionTimeMs(string className, string methodName)
         {
-            return totalExecutionTime.GetValueOrDefault((className, methodName));
+            return totalExecutionTicks.GetValueOrDefault((className, methodName)) / TimeSpan.TicksPerMillisecond;
         }
         
         public static long GetMeanExecutionTimeMs(string className, string methodName)
         {
-            return GetTotalExecutionTimeMs(className, methodName) / GetExecutionCount(className, methodName);
+            var executionCount = GetExecutionCount(className, methodName);
+            if (executionCount == 0)
+                return 0;
+            
+            return GetTotalExecutionTimeMs(className, methodName) / TimeSpan.TicksPerMillisecond / executionCount;
         }
 
         public static long GetExecutionCount(string className, string methodName)

@@ -157,17 +157,17 @@ namespace UnityDecoratorAttribute
                     {
                         case DecoratorAttribute.ParameterType.ClassName:
                             newInst = ilProcessor.Create(OpCodes.Ldstr, type.Name);
-                            InsertBefore(ilProcessor, target, newInst);
+                            InsertBefore(target, newInst);
                             paramIndex++;
                             break;
                         case DecoratorAttribute.ParameterType.MethodName:
                             newInst = ilProcessor.Create(OpCodes.Ldstr, targetMethod.Name);
-                            InsertBefore(ilProcessor, target, newInst);
+                            InsertBefore(target, newInst);
                             paramIndex++;
                             break;
                         case DecoratorAttribute.ParameterType.This:
                             newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) 0);
-                            InsertBefore(ilProcessor, target, newInst);
+                            InsertBefore(target, newInst);
                             paramIndex++;
                             break;
                         case DecoratorAttribute.ParameterType.ParameterValues:
@@ -188,14 +188,14 @@ namespace UnityDecoratorAttribute
             {
                 var preActionRef = assemblyDefinition.MainModule.ImportReference(preAction);
                 newInst = ilProcessor.Create(OpCodes.Call, preActionRef);
-                InsertBefore(ilProcessor, firstInst, newInst);
+                InsertBefore(firstInst, newInst);
             }
 
             private void InjectPostActionCall()
             {
                 var postActionRef = assemblyDefinition.MainModule.ImportReference(postAction);
                 newInst = ilProcessor.Create(OpCodes.Call, postActionRef);
-                InsertBefore(ilProcessor, lastInst, newInst);
+                InsertBefore(lastInst, newInst);
                 
             }
 
@@ -205,7 +205,7 @@ namespace UnityDecoratorAttribute
                 for (int i = 0; i < INJECTION_NOP_COUNT; i++)
                 {
                     newInst = ilProcessor.Create(OpCodes.Nop);
-                    InsertBefore(ilProcessor, firstInst, newInst);
+                    InsertBefore(firstInst, newInst);
                 }
             }
 
@@ -215,7 +215,7 @@ namespace UnityDecoratorAttribute
                 for (int i = 0; i < INJECTION_NOP_COUNT; i++)
                 {
                     newInst = ilProcessor.Create(OpCodes.Nop);
-                    InsertAfter(ilProcessor, lastInst, newInst);
+                    InsertAfter(lastInst, newInst);
                 }
             }
 
@@ -273,10 +273,13 @@ namespace UnityDecoratorAttribute
                 var localVarCount = targetMethod.Body.Variables.Count;
                 returnValueIndex = (byte) (localVarCount - 1);
 
+                var firstOfInjection = ilProcessor.Create(OpCodes.Nop);
+                InsertBefore(lastInst, firstOfInjection);
+                
                 if (targetMethod.ReturnType.Name != "Void")
                 {
                     newInst = ilProcessor.Create(OpCodes.Stloc_S, returnValueIndex);
-                    InsertBefore(ilProcessor, lastInst, newInst);
+                    InsertBefore(lastInst, newInst);
                 }
 
                 InjectParameter(lastInst);
@@ -286,9 +289,28 @@ namespace UnityDecoratorAttribute
                 if (targetMethod.ReturnType.Name != "Void")
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
-                    InsertBefore(ilProcessor, lastInst, newInst);
+                    InsertBefore(lastInst, newInst);
                 }
                 ComputeOffsets(targetMethod.Body);
+                
+                ChangeBranchTarget(lastInst, firstOfInjection);
+                ComputeOffsets(targetMethod.Body);
+            }
+
+            private void ChangeBranchTarget(Instruction lastInst, Instruction firstOfInjection)
+            {
+                foreach (var instruction in targetMethod.Body.Instructions.ToArray())
+                {
+                    if (instruction.OpCode.OperandType == OperandType.InlineBrTarget || 
+                        instruction.OpCode.OperandType == OperandType.ShortInlineBrTarget)
+                    {
+                        if (instruction.Operand == lastInst)
+                        {
+                            newInst = ilProcessor.Create(instruction.OpCode, firstOfInjection);
+                            Replace(instruction, newInst);
+                        }
+                    }
+                }
             }
 
             private int InsertParameterValuesArguments(int paramIndex)
@@ -309,7 +331,7 @@ namespace UnityDecoratorAttribute
                              targetMethod.Parameters[i].ParameterType.IsPrimitive)
                     {
                         newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) argIndex);
-                        InsertBefore(ilProcessor, firstInst, newInst);
+                        InsertBefore(firstInst, newInst);
                         newInst = ilProcessor.Create(OpCodes.Box, targetMethod.Parameters[i].ParameterType);
                     }
                     else
@@ -317,7 +339,7 @@ namespace UnityDecoratorAttribute
                         newInst = ilProcessor.Create(OpCodes.Ldarg_S, (byte) argIndex);
                     }
 
-                    InsertBefore(ilProcessor, firstInst, newInst);
+                    InsertBefore(firstInst, newInst);
                 }
 
                 return targetMethodParamLength;
@@ -335,7 +357,7 @@ namespace UnityDecoratorAttribute
                          targetMethod.ReturnType.IsPrimitive)
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
-                    InsertBefore(ilProcessor, firstInst, newInst);
+                    InsertBefore(firstInst, newInst);
                     newInst = ilProcessor.Create(OpCodes.Box, targetMethod.ReturnType);
                 }
                 else
@@ -343,7 +365,7 @@ namespace UnityDecoratorAttribute
                     newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
                 }
 
-                InsertBefore(ilProcessor, lastInst, newInst);
+                InsertBefore(lastInst, newInst);
             }
 
             private int InsertAttributeValuesArguments(Instruction target)
@@ -364,32 +386,32 @@ namespace UnityDecoratorAttribute
                 if (argumentType == typeof(string))
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldstr, (string) val);
-                    InsertBefore(ilProcessor, target, newInst);
+                    InsertBefore(target, newInst);
                 }
                 else if (argumentType == typeof(int))
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldc_I4, (int) val);
-                    InsertBefore(ilProcessor, target, newInst);
+                    InsertBefore(target, newInst);
                 }
                 else if (argumentType == typeof(long))
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldc_I8, (long) val);
-                    InsertBefore(ilProcessor, target, newInst);
+                    InsertBefore(target, newInst);
                 }
                 else if (argumentType == typeof(float))
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldc_R4, (float) val);
-                    InsertBefore(ilProcessor, target, newInst);
+                    InsertBefore(target, newInst);
                 }
                 else if (argumentType == typeof(double))
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldc_R8, (float) val);
-                    InsertBefore(ilProcessor, target, newInst);
+                    InsertBefore(target, newInst);
                 }
                 else if (argumentType == typeof(bool))
                 {
                     newInst = ilProcessor.Create(OpCodes.Ldc_I4, (bool) val ? 1 : 0);
-                    InsertBefore(ilProcessor, target, newInst);
+                    InsertBefore(target, newInst);
                 }
                 else
                 {
@@ -397,16 +419,19 @@ namespace UnityDecoratorAttribute
                 }
             }
 
-            private Instruction InsertBefore(ILProcessor ilProcessor, Instruction target, Instruction instruction)
+            private void InsertBefore(Instruction target, Instruction instruction)
             {
                 ilProcessor.InsertBefore(target, instruction);
-                return instruction;
             }
 
-            private Instruction InsertAfter(ILProcessor ilProcessor, Instruction target, Instruction instruction)
+            private void InsertAfter(Instruction target, Instruction instruction)
             {
                 ilProcessor.InsertAfter(target, instruction);
-                return instruction;
+            }
+
+            private void Replace(Instruction target, Instruction instruction)
+            {
+                ilProcessor.Replace(target, instruction);
             }
 
             //Calculating the offset of the injected function
