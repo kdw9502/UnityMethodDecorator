@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 
 namespace UnityDecoratorAttribute
 {
-    public class CallLogAttribute : DecoratorAttribute
+    public class ParameterLogAttribute : DecoratorAttribute
     {
         [Preserve]
         public static void PreAction(string className, string methodName)
@@ -15,72 +15,40 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName}");
         }
 
-        public static PreActionParameterType[] PreActionParameterTypes => 
-            new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
-    }
-
-
-    public class OneParameterLogAttribute : DecoratorAttribute
-    {
         [Preserve]
         public static void PreAction(string className, string methodName, object param1)
         {
             Debug.Log($"{className}::{methodName} param: {param1}");
         }
-
-        public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
-    }
-
-
-    public class TwoParameterLogAttribute : DecoratorAttribute
-    {
+        
         [Preserve]
         public static void PreAction(string className, string methodName, object param1, object param2)
         {
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}");
         }
-
-        public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
-    }
-
-    public class ThreeParameterLogAttribute : DecoratorAttribute
-    {
+        
         [Preserve]
         public static void PreAction(string className, string methodName, object param1, object param2, object param3)
         {
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}, {param3}");
         }
-
-        public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
-
-        public int RefCompile()
-        {
-            var retval = 1;
-            Ref(ref retval);
-            return retval;
-        }
-
-        public void Ref(ref int test)
-        {
-            test = 2;
-        }
-    }
-
-
-    public class FourParameterLogAttribute : DecoratorAttribute
-    {
+        
         [Preserve]
         public static void PreAction(string className, string methodName, object param1, object param2, object param3,
             object param4)
         {
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}, {param3}, {param4}");
         }
-
-        public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
+        
+        [Preserve]
+        public static void PreAction(string className, string methodName, object param1, object param2, object param3,
+            object param4, object param5)
+        {
+            Debug.Log($"{className}::{methodName} param: {param1}, {param2}, {param3}, {param4}, {param5}");
+        }
+        
+        public static PreActionParameterType[] PreActionParameterTypes => 
+            new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
     }
 
     public class LogThisAttribute : DecoratorAttribute
@@ -90,8 +58,40 @@ namespace UnityDecoratorAttribute
         {
             Debug.Log($"{@this} {className}::{methodName}");
         }
+        
+        [Preserve]
+        public static void PreAction(string className, string methodName, object @this, object p1)
+        {
+            Debug.Log($"{@this} {className}::{methodName} param : {p1}");
+        }
+        
+        [Preserve]
+        public static void PreAction(string className, string methodName, object @this, object p1, object p2)
+        {
+            Debug.Log($"{@this} {className}::{methodName} param : {p1}, {p2}");
+        }
+        
+        [Preserve]
+        public static void PreAction(string className, string methodName, object @this, object p1, object p2, object p3)
+        {
+            Debug.Log($"{@this} {className}::{methodName} param : {p1}, {p2}, {p3}");
+        }
+
+        [Preserve]
+        public static void PreAction(string className, string methodName, object @this, object p1, object p2, object p3, object p4)
+        {
+            Debug.Log($"{@this} {className}::{methodName} param : {p1}, {p2}, {p3}, {p4}");
+        }
+        
+        [Preserve]
+        public static void PreAction(string className, string methodName, object @this, object p1, object p2, object p3, object p4, object p5)
+        {
+            Debug.Log($"{@this} {className}::{methodName} param : {p1}, {p2}, {p3}, {p4}, {p5}");
+        }
+
+
 
         public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.This};
+            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.This, PreActionParameterType.ParameterValues};
     }
 }

@@ -21,7 +21,7 @@ namespace UnityDecoratorAttribute.Tests
             {
             }
 
-            [CallLog]
+            [ParameterLog]
             public void CallLogMethod()
             {
             }
@@ -49,12 +49,12 @@ namespace UnityDecoratorAttribute.Tests
             {
             }
 
-            [TwoParameterLog]
+            [ParameterLog]
             public void TwoParamLog(string str1, string str2)
             {
             }
 
-            [TwoParameterLog]
+            [ParameterLog]
             public void TwoParamLog(string str, object obj)
             {
             }
@@ -93,15 +93,7 @@ namespace UnityDecoratorAttribute.Tests
         {
             var testClass = new TestClass();
             testClass.CallLogMethod();
-
             LogAssert.Expect(LogType.Log, $"{nameof(TestClass)}::{nameof(TestClass.CallLogMethod)}");
-            yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator TwoParamLogTest()
-        {
-            var testClass = new TestClass();
             testClass.TwoParamLog("testString", "asdf");
             LogAssert.Expect(LogType.Log,
                 $"{nameof(TestClass)}::{nameof(TestClass.TwoParamLog)} param: testString, asdf");
