@@ -6,25 +6,38 @@ using Debug = UnityEngine.Debug;
 
 namespace UnityDecoratorAttribute
 {
+    // only for main thread
     public static class PerformanceCheck
     {
         private static Stopwatch stopwatch = new Stopwatch();
-        private static Dictionary<string, long> executionTime = new();
-        private static string currentMethod;
-        public static void Start(string methodName)
+        private static Dictionary<(string className, string methodName), long> totalExecutionTime = new();
+        private static Dictionary<(string className, string methodName), long> executeCount = new();
+        private static (string className, string methodName) currentMethod;
+        public static void Start(string className, string methodName)
         {
-            currentMethod = methodName;
+            currentMethod = (className, methodName);
             stopwatch.Restart();
         }
 
         public static void End()
         {
-            executionTime[currentMethod] = executionTime.GetValueOrDefault(currentMethod, 0) + stopwatch.ElapsedMilliseconds;
+            executeCount[currentMethod] = executeCount.GetValueOrDefault(currentMethod) + 1;
+            totalExecutionTime[currentMethod] = totalExecutionTime.GetValueOrDefault(currentMethod) + stopwatch.ElapsedMilliseconds;
         }
 
-        public static long GetExecutionTime(string className, string methodName)
+        public static long GetTotalExecutionTimeMs(string className, string methodName)
         {
-            return executionTime.GetValueOrDefault($"{className}::{methodName}");
+            return totalExecutionTime.GetValueOrDefault((className, methodName));
+        }
+        
+        public static long GetMeanExecutionTimeMs(string className, string methodName)
+        {
+            return GetTotalExecutionTimeMs(className, methodName) / GetExecutionCount(className, methodName);
+        }
+
+        public static long GetExecutionCount(string className, string methodName)
+        {
+            return executeCount.GetValueOrDefault((className, methodName));
         }
     }
 
@@ -33,7 +46,7 @@ namespace UnityDecoratorAttribute
         [Preserve]
         public static void PreAction(string className, string methodName)
         {
-            PerformanceCheck.Start($"{className}::{methodName}");
+            PerformanceCheck.Start(className, methodName);
         }
 
         public static ParameterType[] PreActionParameterTypes => new[] {ParameterType.ClassName, ParameterType.MethodName};

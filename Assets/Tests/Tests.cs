@@ -1,14 +1,13 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityDecoratorAttribute;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 using Debug = UnityEngine.Debug;
+using Task = System.Threading.Tasks.Task;
 
 namespace UnityDecoratorAttribute.Tests
 {
@@ -68,7 +67,7 @@ namespace UnityDecoratorAttribute.Tests
             [PerformanceCheck]
             public void PerformanceParamTest()
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
             }
 
             [PerformanceCheck]
@@ -149,11 +148,20 @@ namespace UnityDecoratorAttribute.Tests
         {
             var stopWatch = Stopwatch.StartNew();
             var testClass = new TestClass();
+            var executeCount = UnityEngine.Random.Range(1, 10);
 
-            testClass.PerformanceParamTest();
-            var executionTime = PerformanceCheck.GetExecutionTime(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
-            Debug.Log($"exe {executionTime} stop {stopWatch.ElapsedMilliseconds}");
-            Assert.AreApproximatelyEqual(executionTime, stopWatch.ElapsedMilliseconds, 30);
+            for (int i = 0; i < executeCount; i++)
+            {
+                testClass.PerformanceParamTest();
+            }
+            
+            var totalExecutionTime = PerformanceCheck.GetTotalExecutionTimeMs(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
+            Debug.Log($"exe {totalExecutionTime} stop {stopWatch.ElapsedMilliseconds}");
+            Assert.AreApproximatelyEqual(stopWatch.ElapsedMilliseconds, totalExecutionTime, 50);
+            Assert.AreEqual(executeCount , PerformanceCheck.GetExecutionCount(nameof(TestClass), nameof(testClass.PerformanceParamTest)));
+            var meanExecutionTime =
+                PerformanceCheck.GetMeanExecutionTimeMs(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
+            Assert.AreApproximatelyEqual(stopWatch.ElapsedMilliseconds / executeCount, meanExecutionTime, 15);
             yield return null;
         }
         //
