@@ -36,8 +36,7 @@ namespace UnityDecoratorAttribute
             PerformanceCheck.Start($"{className}::{methodName}");
         }
 
-        public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
+        public static ParameterType[] PreActionParameterTypes => new[] {ParameterType.ClassName, ParameterType.MethodName};
 
         [Preserve]
         public static void PostAction()
@@ -45,6 +44,6 @@ namespace UnityDecoratorAttribute
             PerformanceCheck.End();
         }
 
-        public static PostActionParameterType[] PostActionParameterTypes => new PostActionParameterType[]{};
+        public static ParameterType[] PostActionParameterTypes => new ParameterType[]{};
     }
 }

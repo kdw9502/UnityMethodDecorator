@@ -47,8 +47,8 @@ namespace UnityDecoratorAttribute
             Debug.Log($"{className}::{methodName} param: {param1}, {param2}, {param3}, {param4}, {param5}");
         }
         
-        public static PreActionParameterType[] PreActionParameterTypes => 
-            new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.ParameterValues};
+        public static ParameterType[] PreActionParameterTypes => 
+            new[] {ParameterType.ClassName, ParameterType.MethodName, ParameterType.ParameterValues};
     }
 
     public class LogThisAttribute : DecoratorAttribute
@@ -91,7 +91,7 @@ namespace UnityDecoratorAttribute
 
 
 
-        public static PreActionParameterType[] PreActionParameterTypes => new[]
-            {PreActionParameterType.ClassName, PreActionParameterType.MethodName, PreActionParameterType.This, PreActionParameterType.ParameterValues};
+        public static ParameterType[] PreActionParameterTypes => new[]
+            {ParameterType.ClassName, ParameterType.MethodName, ParameterType.This, ParameterType.ParameterValues};
     }
 }

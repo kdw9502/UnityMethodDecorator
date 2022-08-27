@@ -4,9 +4,13 @@ using UnityEngine.Scripting;
 
 namespace UnityDecoratorAttribute
 {
-    public class ClampParameterInt: DecoratorAttribute
+    public class ClampParameter: DecoratorAttribute
     {
-        public ClampParameterInt(int min, int max)
+        public ClampParameter(int min, int max)
+        {
+        }
+        
+        public ClampParameter(float min, float max)
         {
         }
         
@@ -15,17 +19,6 @@ namespace UnityDecoratorAttribute
         {
             param = Math.Clamp(param, min, max);
         }
-
-        public static PreActionParameterType[] PreActionParameterTypes => 
-            new[] {PreActionParameterType.ParameterValues, PreActionParameterType.AttributeValues};
-    }
-    
-    
-    public class ClampParameterFloat: DecoratorAttribute
-    {
-        public ClampParameterFloat(float min, float max)
-        {
-        }
         
         [Preserve]
         public static void PreAction(ref float param, float min, float max)
@@ -33,9 +26,10 @@ namespace UnityDecoratorAttribute
             param = Math.Clamp(param, min, max);
         }
 
-        public static PreActionParameterType[] PreActionParameterTypes => 
-            new[] {PreActionParameterType.ParameterValues, PreActionParameterType.AttributeValues};
+        public static ParameterType[] PreActionParameterTypes => 
+            new[] {ParameterType.ParameterValues, ParameterType.AttributeValues};
     }
+    
     
     public class ClampReturnInt: DecoratorAttribute
     {
@@ -44,13 +38,13 @@ namespace UnityDecoratorAttribute
         }
         
         [Preserve]
-        public static int PostAction(int param, int min, int max)
+        public static void PostAction(ref int param, int min, int max)
         {
-            return Math.Clamp(param, min, max);
+            param = Math.Clamp(param, min, max);
         }
 
-        public static PostActionParameterType[] PostActionParameterTypes => 
-            new[] {PostActionParameterType.ReturnValue, PostActionParameterType.AttributeValues};
+        public static ParameterType[] PostActionParameterTypes => 
+            new[] {ParameterType.ReturnValue, ParameterType.AttributeValues};
     }
     
 }

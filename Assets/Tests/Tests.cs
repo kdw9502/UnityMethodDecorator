@@ -26,8 +26,14 @@ namespace UnityDecoratorAttribute.Tests
             {
             }
 
-            [ClampParameterInt(0, 100)]
+            [ClampParameter(0, 100)]
             public int ClampParam0to100(int arg)
+            {
+                return arg;
+            }
+            
+            [ClampParameter(0f, 100f)]
+            public float ClampParam0to100(float arg)
             {
                 return arg;
             }
@@ -108,12 +114,19 @@ namespace UnityDecoratorAttribute.Tests
         public IEnumerator ClampParamTest()
         {
             var testClass = new TestClass();
-            var val = testClass.ClampParam0to100(-88);
+            int val = testClass.ClampParam0to100(-88);
             Assert.AreEqual(0, val);
             val = testClass.ClampParam0to100(999);
             Assert.AreEqual(100, val);
             val = testClass.ClampParam0to100(10);
             Assert.AreEqual(10, val);
+            
+            float val2 = testClass.ClampParam0to100(-88f);
+            Assert.AreEqual(0f, val2);
+            val2 = testClass.ClampParam0to100(999f);
+            Assert.AreEqual(100f, val2);
+            val2 = testClass.ClampParam0to100(10f);
+            Assert.AreEqual(10f, val2);
             yield return null;
         }
         
