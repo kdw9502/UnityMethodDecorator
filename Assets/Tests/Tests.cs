@@ -70,12 +70,19 @@ namespace UnityDecoratorAttribute.Tests
                 Thread.Sleep(100);
             }
 
+            private int testValue = 0;
+            
             [PerformanceCheck]
-            public async Task AsyncTest()
+            public void PostActionBranch()
             {
-                Debug.Log("test");
-                await Task.Delay(1000);
+                testValue++;
+                if (testValue > 5)
+                {
+                    Debug.Log($"Do Something");
+                }
+                
             }
+
         }
 
         [UnityTest]
@@ -164,22 +171,22 @@ namespace UnityDecoratorAttribute.Tests
             Assert.AreApproximatelyEqual(stopWatch.ElapsedMilliseconds / executeCount, meanExecutionTime, 15);
             yield return null;
         }
-        //
-        // [UnityTest]
-        // public IEnumerator AsyncTest()
-        // {
-        //     var stopWatch = Stopwatch.StartNew();
-        //     var testClass = new TestClass();
-        //
-        //     var task = testClass.AsyncTest();
-        //     while (!task.IsCompleted)
-        //     {
-        //         yield return null;
-        //     }
-        //
-        //     var executionTime = Performance.GetExecutionTime(nameof(TestClass), nameof(TestClass.AsyncTest));
-        //     Debug.Log($"exe {executionTime} stop {stopWatch.ElapsedMilliseconds}");
-        //     Assert.AreApproximatelyEqual(executionTime, stopWatch.ElapsedMilliseconds, 30);
-        // }
+
+        // fixed in 740b024a976fa0b5101beb414b383d4a5c66e519
+        // if some il branch to ret, PostAction was not called  
+        [UnityTest]
+        public IEnumerator BranchTest()
+        {
+            var testClass = new TestClass();
+            var executeCount = UnityEngine.Random.Range(6, 20);
+            for (int i = 0; i < executeCount; i++)
+            {
+                testClass.PostActionBranch();
+            }
+            Assert.AreEqual(executeCount, PerformanceCheck.GetExecutionCount(nameof(TestClass), nameof(TestClass.PostActionBranch)));
+            yield return null;
+
+        }
+        
     }
 }
