@@ -135,7 +135,7 @@ public class ClampReturnAttribute : DecoratorAttribute
 
 
 ```c#
-public enum PreActionParameterType
+public enum ParameterType
 {
     ClassName,
     MethodName,
