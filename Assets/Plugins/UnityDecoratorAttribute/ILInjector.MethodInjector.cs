@@ -291,10 +291,11 @@ namespace UnityDecoratorAttribute
                     newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
                     InsertBefore(lastInst, newInst);
                 }
-                ComputeOffsets(targetMethod.Body);
+                // ComputeOffsets(targetMethod.Body);
                 
                 ChangeBranchTarget(lastInst, firstOfInjection);
                 ComputeOffsets(targetMethod.Body);
+
             }
 
             private void ChangeBranchTarget(Instruction lastInst, Instruction firstOfInjection)

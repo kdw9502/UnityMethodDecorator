@@ -80,9 +80,34 @@ namespace UnityDecoratorAttribute.Tests
                 {
                     Debug.Log($"Do Something");
                 }
-                
             }
 
+            [PerformanceCheck]
+            public int ManyReturnPostActionBranch(int a)
+            {
+                if (a == 0)
+                {
+                    return 1;
+                }
+
+                if (a == 1)
+                {
+                    return 2;
+                }
+
+                if (a == 2)
+                {
+                    return 3;
+                }
+
+                if (a == 3)
+                {
+                    return 1;
+                }
+
+                return 0;
+            }
+            
         }
 
         [UnityTest]
@@ -184,6 +209,20 @@ namespace UnityDecoratorAttribute.Tests
                 testClass.PostActionBranch();
             }
             Assert.AreEqual(executeCount, PerformanceCheck.GetExecutionCount(nameof(TestClass), nameof(TestClass.PostActionBranch)));
+            yield return null;
+
+        }
+        
+        [UnityTest]
+        public IEnumerator BranchTest2()
+        {
+            var testClass = new TestClass();
+            var executeCount = UnityEngine.Random.Range(6, 20);
+            for (int i = 0; i < executeCount; i++)
+            {
+                testClass.ManyReturnPostActionBranch(i);
+            }
+            Assert.AreEqual(executeCount, PerformanceCheck.GetExecutionCount(nameof(TestClass), nameof(TestClass.ManyReturnPostActionBranch)));
             yield return null;
 
         }
