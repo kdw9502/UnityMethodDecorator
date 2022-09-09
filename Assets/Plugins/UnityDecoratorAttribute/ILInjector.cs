@@ -83,12 +83,23 @@ namespace UnityDecoratorAttribute
                     var decoratorAttribute = method.CustomAttributes.FirstOrDefault(attr =>
                         typeof(DecoratorAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
 
-                    if (decoratorAttribute == null)
-                        continue;
+                    if (decoratorAttribute != null)
+                    {
+                        var methodInjector = new MethodInjector(type, method, decoratorAttribute, assemblyDefinition);
+                        methodInjector.InsertPreAction();
+                        methodInjector.InsertPostAction();
+                    }
+                    
+                    var ignoreExceptionAttribute = method.CustomAttributes.FirstOrDefault(attr =>
+                        typeof(IgnoreExceptionAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
 
-                    var methodInjector = new MethodInjector(type, method, decoratorAttribute, assemblyDefinition);
-                    methodInjector.InsertPreAction();
-                    methodInjector.InsertPostAction();
+                    if (ignoreExceptionAttribute != null)
+                    {
+                        var tryCatchInjector =
+                            new TryCatchInjector(type, method, decoratorAttribute, assemblyDefinition);
+                        tryCatchInjector.InjectTryCatch();
+                    }
+                        
                 }
             }
 
