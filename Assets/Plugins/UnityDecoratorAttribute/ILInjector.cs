@@ -96,7 +96,7 @@ namespace UnityDecoratorAttribute
                     if (ignoreExceptionAttribute != null)
                     {
                         var tryCatchInjector =
-                            new TryCatchInjector(type, method, decoratorAttribute, assemblyDefinition);
+                            new TryCatchInjector(type, method, ignoreExceptionAttribute, assemblyDefinition);
                         tryCatchInjector.InjectTryCatch();
                     }
                         

@@ -3,9 +3,11 @@ using UnityEngine;
 
 namespace UnityDecoratorAttribute
 {
-    public class IgnoreExceptionAttribute
+    [AttributeUsage(AttributeTargets.Method)]
+
+    public class IgnoreExceptionAttribute: Attribute
     {
-        public void CatchException(Exception exception)
+        public static void CatchException(Exception exception)
         {
             Debug.Log($"{exception.Message}");
         }
