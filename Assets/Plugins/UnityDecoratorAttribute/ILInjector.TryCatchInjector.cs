@@ -44,15 +44,16 @@ namespace UnityDecoratorAttribute
                 var catchMethod = ilProcessor.Create(
                     OpCodes.Call,
                     assemblyDefinition.MainModule.ImportReference(attributeType.GetMethod("CatchException", new[] {typeof(Exception)})));
-
-                // ilProcessor.InsertAfter(beforeReturn, catchMethod);
+                
+                ilProcessor.InsertAfter(beforeReturn, catchMethod);
                 
                 var handler = new ExceptionHandler(ExceptionHandlerType.Catch)
                 {
                     TryStart = firstInst,
                     TryEnd = beforeReturn,
                     HandlerStart = beforeReturn,
-                    HandlerEnd = returnInstruction
+                    HandlerEnd = returnInstruction,
+                    CatchType = assemblyDefinition.MainModule.ImportReference(typeof(Exception))
                 };
 
                 targetMethod.Body.ExceptionHandlers.Add(handler);

@@ -23,6 +23,7 @@ namespace UnityDecoratorAttribute.Tests
             [ParameterLog]
             public void CallLogMethod()
             {
+                
             }
 
             [ClampParameter(0, 100)]

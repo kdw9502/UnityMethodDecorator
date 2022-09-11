@@ -15,7 +15,6 @@ namespace UnityDecoratorAttribute.Tests
             public void Throw()
             {
                 throw new Exception("Test Exception");
-                
             }
         }
         
