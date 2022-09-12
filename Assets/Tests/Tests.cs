@@ -69,6 +69,7 @@ namespace UnityDecoratorAttribute.Tests
             public void PerformanceParamTest()
             {
                 Thread.Sleep(100);
+                
             }
 
             private int testValue = 0;
@@ -134,11 +135,11 @@ namespace UnityDecoratorAttribute.Tests
             LogAssert.Expect(LogType.Log, $"{nameof(TestClass)}::{nameof(TestClass.CallLogMethod)}");
             testClass.TwoParamLog("testString", "asdf");
             LogAssert.Expect(LogType.Log,
-                $"{nameof(TestClass)}::{nameof(TestClass.TwoParamLog)} param: testString, asdf");
+                $"{nameof(TestClass)}::{nameof(TestClass.TwoParamLog)} Parameters : testString, asdf");
 
             testClass.TwoParamLog("testString", 0.01f);
             LogAssert.Expect(LogType.Log,
-                $"{nameof(TestClass)}::{nameof(TestClass.TwoParamLog)} param: testString, {0.01f}");
+                $"{nameof(TestClass)}::{nameof(TestClass.TwoParamLog)} Parameters : testString, {0.01f}");
             yield return null;
         }
 
@@ -189,11 +190,13 @@ namespace UnityDecoratorAttribute.Tests
             }
             
             var totalExecutionTime = PerformanceCheck.GetTotalExecutionTimeMs(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
-            Debug.Log($"exe {totalExecutionTime} stop {stopWatch.ElapsedMilliseconds}");
+            Debug.Log($"totalExecutionTime {totalExecutionTime} stopwatch {stopWatch.ElapsedMilliseconds}");
             Assert.AreApproximatelyEqual(stopWatch.ElapsedMilliseconds, totalExecutionTime, 50);
             Assert.AreEqual(executeCount , PerformanceCheck.GetExecutionCount(nameof(TestClass), nameof(testClass.PerformanceParamTest)));
             var meanExecutionTime =
                 PerformanceCheck.GetMeanExecutionTimeMs(nameof(TestClass), nameof(TestClass.PerformanceParamTest));
+            Debug.Log($"meanExecutionTime {meanExecutionTime} stopwatch {stopWatch.ElapsedMilliseconds / executeCount}");
+
             Assert.AreApproximatelyEqual(stopWatch.ElapsedMilliseconds / executeCount, meanExecutionTime, 15);
             yield return null;
         }

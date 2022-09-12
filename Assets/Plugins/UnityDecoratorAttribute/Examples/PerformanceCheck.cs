@@ -37,7 +37,7 @@ namespace UnityDecoratorAttribute
             if (executionCount == 0)
                 return 0;
             
-            return GetTotalExecutionTimeMs(className, methodName) / TimeSpan.TicksPerMillisecond / executionCount;
+            return GetTotalExecutionTimeMs(className, methodName) / executionCount;
         }
 
         public static long GetExecutionCount(string className, string methodName)
