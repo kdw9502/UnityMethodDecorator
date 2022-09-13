@@ -4,7 +4,7 @@ currently not fully implemented and tested.
 
 # UnityDecoratorAttribute
 
-Python style decorator, which is add action to method with attribute, implement using dll injection.
+Like Python's @decorator, add custom action to method with attribute.(implemented using dll injection.)
 
 By adding DecoratorAttribute to method, you can execute custom actions on beginning of method and end of method.
 
