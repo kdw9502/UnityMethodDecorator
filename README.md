@@ -1,7 +1,3 @@
-# WIP
-
-currently not fully implemented and tested.
-
 # UnityDecoratorAttribute
 
 Like Python's @decorator, add custom action to method with attribute.(implemented using dll injection.)
@@ -15,6 +11,8 @@ By adding DecoratorAttribute to method, you can execute custom actions on beginn
 # Usage
 
 ## PreDefined Example Attributes
+
+[IgnoreException](Assets/Plugins/UnityDecoratorAttribute/IgnoreExceptionAttribute.cs): Ignore Exception and return default value when an exception is raised.
 
 [PrameterLog](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values when the method is called.
 ```c#

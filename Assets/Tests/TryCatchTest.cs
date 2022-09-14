@@ -9,12 +9,15 @@ namespace UnityDecoratorAttribute.Tests
 {
     public class TryCatchTest
     {
+        public static Exception exception = new Exception("Test Exception");
+        
         public class TestClass
         {
             [IgnoreException]
             public void Throw()
             {
-                throw new Exception("Test Exception");
+                
+                throw exception;
             }
         }
         
@@ -28,10 +31,13 @@ namespace UnityDecoratorAttribute.Tests
             }
             catch (Exception ex)
             {
-                Assert.IsTrue(false);
+                if (ex == exception)
+                    Assert.IsTrue(false);
+                else
+                    throw;
             }
             
-            LogAssert.Expect(LogType.Log, $"Test Exception");
+            LogAssert.Expect(LogType.Error, exception.ToString());
 
 
             yield return null;

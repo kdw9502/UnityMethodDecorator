@@ -9,7 +9,7 @@ namespace UnityDecoratorAttribute
     {
         public static void CatchException(Exception exception)
         {
-            Debug.Log($"{exception.Message}");
+            Debug.LogError(exception);
         }
     }
 }
