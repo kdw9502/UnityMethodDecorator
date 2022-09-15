@@ -72,45 +72,48 @@ namespace UnityDecoratorAttribute
 
         private static void InjectAssembly(string assemblyPath)
         {
-            using var assemblyDefinition =
-                AssemblyDefinition.ReadAssembly(assemblyPath, new ReaderParameters {ReadWrite = true});
-            var types = assemblyDefinition.MainModule.GetTypes();
-            foreach (var type in types)
+            using (var assemblyDefinition =
+                   AssemblyDefinition.ReadAssembly(assemblyPath,
+                       new ReaderParameters {ReadWrite = true, ReadSymbols = true}))
             {
-                var methods = type.GetMethods();
-                foreach (var method in methods)
+                var types = assemblyDefinition.MainModule.GetTypes();
+                foreach (var type in types)
                 {
-                    var decoratorAttribute = method.CustomAttributes.FirstOrDefault(attr =>
-                        typeof(DecoratorAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
-
-                    if (decoratorAttribute != null)
+                    var methods = type.GetMethods();
+                    foreach (var method in methods)
                     {
-                        var methodInjector = new MethodInjector(type, method, decoratorAttribute, assemblyDefinition);
-                        methodInjector.InsertPreAction();
-                        methodInjector.InsertPostAction();
-                    }
+                        var decoratorAttribute = method.CustomAttributes.FirstOrDefault(attr =>
+                            typeof(DecoratorAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
+
+                        if (decoratorAttribute != null)
+                        {
+                            var methodInjector = new MethodInjector(type, method, decoratorAttribute, assemblyDefinition);
+                            methodInjector.InsertPreAction();
+                            methodInjector.InsertPostAction();
+                        }
                     
-                    var ignoreExceptionAttribute = method.CustomAttributes.FirstOrDefault(attr =>
-                        typeof(IgnoreExceptionAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
+                        var ignoreExceptionAttribute = method.CustomAttributes.FirstOrDefault(attr =>
+                            typeof(IgnoreExceptionAttribute).IsAssignableFrom(attr.AttributeType.GetMonoType()));
 
-                    if (ignoreExceptionAttribute != null)
-                    {
-                        var tryCatchInjector =
-                            new TryCatchInjector(type, method, ignoreExceptionAttribute, assemblyDefinition);
-                        tryCatchInjector.InjectTryCatch();
-                    }
+                        if (ignoreExceptionAttribute != null)
+                        {
+                            var tryCatchInjector =
+                                new TryCatchInjector(type, method, ignoreExceptionAttribute, assemblyDefinition);
+                            tryCatchInjector.InjectTryCatch();
+                        }
                         
+                    }
                 }
-            }
 
-            foreach (var searchPath in AppDomain.CurrentDomain.GetAssemblies()
-                         .Select(asm => Path.GetDirectoryName(asm.ManifestModule.FullyQualifiedName))
-                         .Where(path => !string.IsNullOrEmpty(path)).Distinct())
-            {
-                ((BaseAssemblyResolver) assemblyDefinition.MainModule.AssemblyResolver).AddSearchDirectory(searchPath);
-            }
+                foreach (var searchPath in AppDomain.CurrentDomain.GetAssemblies()
+                             .Select(asm => Path.GetDirectoryName(asm.ManifestModule.FullyQualifiedName))
+                             .Where(path => !string.IsNullOrEmpty(path)).Distinct())
+                {
+                    ((BaseAssemblyResolver) assemblyDefinition.MainModule.AssemblyResolver).AddSearchDirectory(searchPath);
+                }
 
-            assemblyDefinition.Write();
+                assemblyDefinition.Write(new WriterParameters{WriteSymbols = true});
+            }
         }
     }
 }
