@@ -88,8 +88,7 @@ namespace UnityDecoratorAttribute
                         if (decoratorAttribute != null)
                         {
                             var methodInjector = new MethodInjector(type, method, decoratorAttribute, assemblyDefinition);
-                            methodInjector.InsertPreAction();
-                            methodInjector.InsertPostAction();
+                            methodInjector.Inject();
                         }
                     
                         var ignoreExceptionAttribute = method.CustomAttributes.FirstOrDefault(attr =>
@@ -99,7 +98,7 @@ namespace UnityDecoratorAttribute
                         {
                             var tryCatchInjector =
                                 new TryCatchInjector(type, method, ignoreExceptionAttribute, assemblyDefinition);
-                            tryCatchInjector.InjectTryCatch();
+                            tryCatchInjector.Inject();
                         }
                         
                     }

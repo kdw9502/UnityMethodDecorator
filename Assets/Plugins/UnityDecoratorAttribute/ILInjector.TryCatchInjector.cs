@@ -9,33 +9,19 @@ namespace UnityDecoratorAttribute
 {
     public static partial class ILInjector
     {
-        private class TryCatchInjector
+        private class TryCatchInjector : AbstractInjector
         {
-            private readonly TypeDefinition type;
-            private readonly AssemblyDefinition assemblyDefinition;
-            private readonly MethodDefinition targetMethod;
-            private readonly CustomAttribute attribute;
-            private readonly Type attributeType;
-            private readonly ILProcessor ilProcessor;
-            private readonly Instruction firstInst;
-            private readonly Instruction lastInst;
 
             public TryCatchInjector(TypeDefinition type, MethodDefinition targetMethod, CustomAttribute attribute,
-                AssemblyDefinition assemblyDefinition)
+                AssemblyDefinition assemblyDefinition):base(type,targetMethod,attribute,assemblyDefinition)
             {
-                this.type = type;
-                this.targetMethod = targetMethod;
-                this.attribute = attribute;
-                this.assemblyDefinition = assemblyDefinition;
-
-                attributeType = attribute.AttributeType.GetMonoType();
-                ilProcessor = targetMethod.Body.GetILProcessor();
-                firstInst = FirstInstructionSkipCtor();
-                lastInst = targetMethod.Body.Instructions.Last();
             }
 
-            public void InjectTryCatch()
+            public override void Inject()
             {
+                if (IsInjected())
+                    return;
+                
                 var returnInstruction = FixReturns();
 
                 var beforeReturn = Instruction.Create(OpCodes.Nop);
@@ -57,22 +43,9 @@ namespace UnityDecoratorAttribute
                 };
 
                 targetMethod.Body.ExceptionHandlers.Add(handler);
-                targetMethod.Body.InitLocals = true;
-                targetMethod.Body.OptimizeMacros();
+                OnAfterMethodInject();
+            }
 
-                ComputeOffsets(targetMethod.Body);
-            }
-            
-            private void ComputeOffsets(MethodBody body)
-            {
-                var offset = 0;
-                foreach (var instruction in body.Instructions)
-                {
-                    instruction.Offset = offset;
-                    offset += instruction.GetSize();
-                }
-            }
-            
             // https://stackoverflow.com/questions/12769699/mono-cecil-injecting-try-finally
             Instruction FixReturns()
             {

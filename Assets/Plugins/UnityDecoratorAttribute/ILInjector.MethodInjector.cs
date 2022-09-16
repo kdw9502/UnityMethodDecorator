@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using UnityEngine;
 using MethodBody = Mono.Cecil.Cil.MethodBody;
 
@@ -12,46 +13,27 @@ namespace UnityDecoratorAttribute
 {
     public static partial class ILInjector
     {
-        private class MethodInjector
+        private class MethodInjector : AbstractInjector
         {
             private enum ActionType
             {
                 PreAction,
                 PostAction
             }
-            
-            private TypeDefinition type;
-            private MethodDefinition targetMethod;
-            private CustomAttribute attribute;
-            private Type attributeType;
-            private AssemblyDefinition assemblyDefinition;
 
             private MethodInfo preAction;
             private DecoratorAttribute.ParameterType[] enumParams;
             private Instruction newInst;
-            private ILProcessor ilProcessor;
-            private Instruction firstInst;
-
             private MethodInfo postAction;
-            private Instruction lastInst;
 
             private BindingFlags bindingFlag = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static |
                                                BindingFlags.FlattenHierarchy;
 
             private byte returnValueIndex;
-
+            
             public MethodInjector(TypeDefinition type, MethodDefinition targetMethod, CustomAttribute attribute,
-                AssemblyDefinition assemblyDefinition)
+                AssemblyDefinition assemblyDefinition):base(type,targetMethod,attribute,assemblyDefinition)
             {
-                this.type = type;
-                this.targetMethod = targetMethod;
-                this.attribute = attribute;
-                this.assemblyDefinition = assemblyDefinition;
-
-                attributeType = attribute.AttributeType.GetMonoType();
-                ilProcessor = targetMethod.Body.GetILProcessor();
-                firstInst = targetMethod.Body.Instructions.First();
-                lastInst = targetMethod.Body.Instructions.Last();
             }
 
             private bool ValidateParams(ActionType actionType)
@@ -199,43 +181,16 @@ namespace UnityDecoratorAttribute
                 
             }
 
-            private void InjectNopForCheckInjectedPreAction()
+            public override void Inject()
             {
-                // To Check Injection, Insert 3 nop  
-                for (int i = 0; i < INJECTION_NOP_COUNT; i++)
-                {
-                    newInst = ilProcessor.Create(OpCodes.Nop);
-                    InsertBefore(firstInst, newInst);
-                }
+                if (IsInjected())
+                    return;
+                
+                InsertPreAction();
+                InsertPostAction();
             }
 
-            private void InjectNopForCheckInjectedPostAction()
-            {
-                // To Check Injection, Insert 3 nop  
-                for (int i = 0; i < INJECTION_NOP_COUNT; i++)
-                {
-                    newInst = ilProcessor.Create(OpCodes.Nop);
-                    InsertAfter(lastInst, newInst);
-                }
-            }
-
-            private bool IsAlreadyInjectPreAction()
-            {
-                if (targetMethod.Body.Instructions.Count < INJECTION_NOP_COUNT)
-                    return false;
-
-                return targetMethod.Body.Instructions.Take(3).All(inst => inst.OpCode.Code == Code.Nop);
-            }
-
-            private bool IsAlreadyInjectPostAction()
-            {
-                if (targetMethod.Body.Instructions.Count < INJECTION_NOP_COUNT)
-                    return false;
-
-                return targetMethod.Body.Instructions.TakeLast(3).All(inst => inst.OpCode.Code == Code.Nop);
-            }
-
-            public void InsertPreAction()
+            private void InsertPreAction()
             {
                 if (!ValidateParams(ActionType.PreAction))
                     return;
@@ -245,17 +200,12 @@ namespace UnityDecoratorAttribute
                     return;
                 }
 
-                if (IsAlreadyInjectPreAction())
-                    return;
-
-                InjectNopForCheckInjectedPreAction();
                 InjectParameter(firstInst);
                 InjectPreActionCall();
-
-                ComputeOffsets(targetMethod.Body);
+                OnAfterMethodInject();
             }
 
-            public void InsertPostAction()
+            private void InsertPostAction()
             {
                 if (!ValidateParams(ActionType.PostAction))
                     return;
@@ -264,20 +214,20 @@ namespace UnityDecoratorAttribute
                 {
                     return;
                 }
-                
-                if (IsAlreadyInjectPostAction())
-                    return;
 
-                InjectNopForCheckInjectedPostAction();
 
-                var localVarCount = targetMethod.Body.Variables.Count;
-                returnValueIndex = (byte) (localVarCount - 1);
 
                 var firstOfInjection = ilProcessor.Create(OpCodes.Nop);
                 InsertBefore(lastInst, firstOfInjection);
                 
                 if (targetMethod.ReturnType.Name != "Void")
                 {
+                    var returnVarIndex = targetMethod.Body.Variables.Count - 1;
+                    while (returnVarIndex >= 0 && targetMethod.Body.Variables[returnVarIndex].VariableType != targetMethod.ReturnType)
+                    {
+                        returnVarIndex--;
+                    }
+                    returnValueIndex = (byte)returnVarIndex;
                     newInst = ilProcessor.Create(OpCodes.Stloc_S, returnValueIndex);
                     InsertBefore(lastInst, newInst);
                 }
@@ -291,11 +241,9 @@ namespace UnityDecoratorAttribute
                     newInst = ilProcessor.Create(OpCodes.Ldloc_S, returnValueIndex);
                     InsertBefore(lastInst, newInst);
                 }
-                ComputeOffsets(targetMethod.Body);
                 
                 ChangeBranchTarget(lastInst, firstOfInjection);
-                ComputeOffsets(targetMethod.Body);
-
+                OnAfterMethodInject();
             }
 
             private void ChangeBranchTarget(Instruction lastInst, Instruction firstOfInjection)
@@ -433,17 +381,6 @@ namespace UnityDecoratorAttribute
             private void Replace(Instruction target, Instruction instruction)
             {
                 ilProcessor.Replace(target, instruction);
-            }
-
-            //Calculating the offset of the injected function
-            private void ComputeOffsets(MethodBody body)
-            {
-                var offset = 0;
-                foreach (var instruction in body.Instructions)
-                {
-                    instruction.Offset = offset;
-                    offset += instruction.GetSize();
-                }
             }
         }
     }
