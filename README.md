@@ -14,6 +14,10 @@ By adding DecoratorAttribute to method, you can execute custom actions on beginn
 
 [IgnoreException](Assets/Plugins/UnityDecoratorAttribute/IgnoreExceptionAttribute.cs): Ignore Exception and return default value when an exception is raised.
 
+[IgnoreNullException](Assets/Plugins/UnityDecoratorAttribute/Examples/IgnoreNullException.cs): Only Ignore NullReferenceException. (An example of IgnoreExceptionAttribute inheritance.
+)
+
+
 [PrameterLog](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values when the method is called.
 ```c#
 [ParameterLog]
