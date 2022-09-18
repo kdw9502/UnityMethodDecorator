@@ -5,7 +5,7 @@ namespace UnityDecoratorAttribute
 {
     [AttributeUsage(AttributeTargets.Method)]
 
-    public class IgnoreNullException: IgnoreExceptionAttribute
+    public partial class IgnoreNullException : IgnoreExceptionAttribute
     {
         public static void CatchException(Exception exception)
         {

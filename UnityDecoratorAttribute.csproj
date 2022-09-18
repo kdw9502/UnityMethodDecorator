@@ -54,6 +54,7 @@
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\ILInjector.TryCatchInjector.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\CallLog.cs" />
      <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\CallCounter.cs" />
+     <Compile Include="Assets\Plugins\UnityDecoratorAttribute\Examples\IgnoreExceptionWithoutLog.cs" />
      <None Include="Assets\Plugins\UnityDecoratorAttribute\UnityDecoratorAttribute.asmdef" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.5f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

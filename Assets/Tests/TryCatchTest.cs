@@ -28,6 +28,12 @@ namespace UnityDecoratorAttribute.Tests
 
                 return a.GetHashCode();
             }
+            
+            [IgnoreExceptionWithoutLog]
+            public int ReturnValueOrException(int a)
+            {
+                return new[] {0, 1, 2, 3}[a];
+            }
         }
         
         [UnityTest]
@@ -70,6 +76,27 @@ namespace UnityDecoratorAttribute.Tests
             LogAssert.Expect(LogType.Error, new Regex(".*System.NullReferenceException.*"));
             
 
+            yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator IgnoreExceptionReturnValueTest()
+        {
+            var testClass = new TestClass();
+
+            var result = testClass.ReturnValueOrException(0);
+            Assert.AreEqual(0, result);
+            result = testClass.ReturnValueOrException(1);
+            Assert.AreEqual(1, result);
+            result = testClass.ReturnValueOrException(2);
+            Assert.AreEqual(2, result);
+            result = testClass.ReturnValueOrException(3);
+            Assert.AreEqual(3, result);
+            result = testClass.ReturnValueOrException(4);
+            Assert.AreEqual(0, result);
+            result = testClass.ReturnValueOrException(5);
+            Assert.AreEqual(0, result);
+            
             yield return null;
         }
     }
