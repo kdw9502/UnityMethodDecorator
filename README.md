@@ -152,7 +152,7 @@ public enum ParameterType
 
 ## Limitation
 
-Not support for async methods.
+Not support for coroutines and async methods.
 
 ## License
 
