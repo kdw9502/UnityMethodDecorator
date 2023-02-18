@@ -1,31 +1,30 @@
 # UnityDecoratorAttribute
 
-Like Python's @decorator, add custom action to method with attribute.(implemented using dll injection.)
+UnityDecoratorAttribute is a library for adding custom actions to methods using attributes, similar to Python's @decorator. This library is implemented using Mono.Cecil.
 
-By adding DecoratorAttribute to method, you can execute custom actions on beginning of method and end of method.
+By adding the DecoratorAttribute to a method, you can execute custom actions at the beginning and end of the method.
+## Installation
 
-## Install
-
-[Download package](https://github.com/kdw9502/UnityDecoratorAttribute/releases) and import to your Unity project.
-
+To use UnityDecoratorAttribute, download the package from [this GitHub repository](https://github.com/kdw9502/UnityDecoratorAttribute/releases)  and import it into your Unity project.
 # Usage
+## Predefined Example Attributes
 
-## PreDefined Example Attributes
+UnityDecoratorAttribute comes with several predefined example attributes that you can use to add custom actions to your methods: 
+- [IgnoreExceptionAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/IgnoreExceptionAttribute.cs) : Ignores exceptions and returns a default value when an exception is raised. 
+- [IgnoreNullExceptionAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/IgnoreNullException.cs) : Only ignores NullReferenceExceptions. This is an example of an attribute that inherits from IgnoreExceptionAttribute. 
+- [ParameterLogAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Logs parameter values when the method is called.
 
-[IgnoreException](Assets/Plugins/UnityDecoratorAttribute/IgnoreExceptionAttribute.cs): Ignore Exception and return default value when an exception is raised.
-
-[IgnoreNullException](Assets/Plugins/UnityDecoratorAttribute/Examples/IgnoreNullException.cs): Only Ignore NullReferenceException. (An example of IgnoreExceptionAttribute inheritance.
-)
-
-
-[PrameterLog](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values when the method is called.
 ```c#
 [ParameterLog]
 public void TestParameterLog(int a, float b, Text text)
 {
 }
+
 ```
-[InstanceLog](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Log parameter values and instance.ToString() when the method called.
+
+ 
+- [InstanceLogAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Logs parameter values and instance.ToString() when the method is called.
+
 ```c#
 [InstanceLog]
 public void TestInstanceLog(int a)
@@ -33,21 +32,24 @@ public void TestInstanceLog(int a)
 }
 
 ```
+
+
 ### Result
 
-![image](https://user-images.githubusercontent.com/21076531/187033810-063e7924-224d-4277-a2ae-12b05bd04dfb.png)
+![image](https://user-images.githubusercontent.com/21076531/187033810-063e7924-224d-4277-a2ae-12b05bd04dfb.png) 
+ 
+- [CallCounterAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Stores the number of times a method is called and returns the count using `CallCounter.GetMethodCallCount(className, methodName)`.
 
-[CallCount](Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Store the number of method call and get count by `CallCounter.GetMethodCallCount(className, methodName)`
+![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png) 
+ 
+- [PerformanceCheckAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/PerformanceCheck.cs) : Stores the total execution time and count.
 
-![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png)
+`PerformanceCheck.GetExecutionCount(className, methodName)`: Returns the number of times the method has been executed (called).
 
-[PerformanceCheckAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/PerformanceCheck.cs) : Store total execution time and count.
+`PerformanceCheck.GetTotalExecutionTimeMs(className, methodName)`: Returns the total execution time of the method in milliseconds.
 
-`PerformanceCheck.GetExecutionCount(className, methodName)` : Return method execution (call) Count
+`PerformanceCheck.GetMeanExecutionTimeMs(className, methodName)`: Returns the mean execution time of the method in milliseconds.
 
-`PerformanceCheck.GetTotalExecutionTimeMs(className, methodName)` : return total execution time of method in milliseconds
-
-`PerformanceCheck.GetMeanExecutionTimeMs(className, methodName)` : return mean execution time of method in milliseconds
 ```c#
 [PerformanceCheck]
 public void Update()
@@ -56,41 +58,40 @@ public void Update()
     if (elapsedTime <= 5) 
         return;
 
-    Debug.Log($"GetExecutionCount : {PerformanceCheck.GetExecutionCount(nameof(AttributeExample), nameof(Update))}");
-    Debug.Log($"GetTotalExecutionTimeMs : {PerformanceCheck.GetTotalExecutionTimeMs(nameof(AttributeExample), nameof(Update))} ms");
-    Debug.Log($"GetMeanExecutionTimeMs : {PerformanceCheck.GetMeanExecutionTimeMs(nameof(AttributeExample), nameof(Update))} ms");
+    Debug.Log($"GetExecutionCount: {PerformanceCheck.GetExecutionCount(nameof(AttributeExample), nameof(Update))}");
+    Debug.Log($"GetTotalExecutionTimeMs: {PerformanceCheck.GetTotalExecutionTimeMs(nameof(AttributeExample), nameof(Update))} ms");
+    Debug.Log($"GetMeanExecutionTimeMs: {PerformanceCheck.GetMeanExecutionTimeMs(nameof(AttributeExample), nameof(Update))} ms");
     elapsedTime = 0;
 }
+
 ```
-![image](https://user-images.githubusercontent.com/21076531/187035466-d63a8c20-6ef9-4962-8468-616d13903928.png)
-
-[ClampParameter](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp first parameter value.
-
-[ClampReturn](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamp return value.
-
-etc.
 
 
-## Make Custom attribute
 
-Create Attribute inherit UnityDecoratorAttribute.DecoratorAttribute
-```c#
-public class ExampleAttribute : DecoratorAttribute
+![image](https://user-images.githubusercontent.com/21076531/187035466-d63a8c20-6ef9-4962-8468-616d13903928.png) 
+ 
+- [ClampParameterAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamps the value of the first parameter. 
+- [ClampReturnAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamps the return value.
+## Creating a Custom Attribute
+
+To create a custom attribute, you need to inherit from `UnityDecoratorAttribute.DecoratorAttribute`:
+
+```
+c#public class ExampleAttribute : DecoratorAttribute
 {
 }
+
 ```
 
-### PreAction 
 
-PreAction is always called when target method is called.
+### PreAction
 
-#### Define
+The `PreAction` method is always called when the target method is called.
+#### Defining PreAction
 
-Define method `public static void PreAction` Attribute. 
-
-If your PreAction needs parameter, Define field `public static ParameterType[] PreActionParameterTypes`
-
+To define the `PreAction` method in your attribute, create a static method called `PreAction`. If your `PreAction` method needs parameters, define a field called `PreActionParameterTypes` with the required parameter types.
 ##### Example
+
 ```c#
 public class DebugLogAttribute : DecoratorAttribute
 {
@@ -103,20 +104,18 @@ public class DebugLogAttribute : DecoratorAttribute
     public static PreActionParameterType[] PreActionParameterTypes => 
         new[] {PreActionParameterType.ClassName, PreActionParameterType.MethodName};
 }
+
 ```
 
 
-### PostAction 
+### PostAction
 
-PostAction is called before target method return.
+The `PostAction` method is called before the target method returns.
+#### Defining PostAction
 
-#### Define
-
-Define method `public static void PostAction` Attribute. 
-
-If your PostAction needs parameter, Define field `public static ParameterType[] PostActionParameterTypes`
-
+To define the `PostAction` method in your attribute, create a static method called `PostAction`. If your `PostAction` method needs parameters, define a field called `PostActionParameterTypes` with the required parameter types.
 ##### Example
+
 ```c#
 public class ClampReturnAttribute : DecoratorAttribute
 {
@@ -133,8 +132,12 @@ public class ClampReturnAttribute : DecoratorAttribute
     public static ParameterType[] PostActionParameterTypes =>
         new[] {ParameterType.ReturnValue, ParameterType.AttributeValues};
 }
+
 ```
 
+
+
+The `PostAction` method can take parameters of different types. You can use the `ParameterType` enum to specify the type of each parameter.
 
 ```c#
 public enum ParameterType
@@ -146,14 +149,13 @@ public enum ParameterType
     ReturnValue, //  Target Method's ReturnValue (only for PostAction)
     AttributeValues, // Attribute values
 }
+
 ```
 
 
+## Limitations
 
-## Limitation
-
-Not support for coroutines and async methods.
-
+This library does not support coroutines or async methods.
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](https://chat.openai.com/LICENSE)  file for details.
