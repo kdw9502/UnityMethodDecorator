@@ -10,9 +10,9 @@ To use UnityDecoratorAttribute, download the package from [this GitHub repositor
 ## Predefined Example Attributes
 
 UnityDecoratorAttribute comes with several predefined example attributes that you can use to add custom actions to your methods: 
-- [IgnoreExceptionAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/IgnoreExceptionAttribute.cs) : Ignores exceptions and returns a default value when an exception is raised. 
-- [IgnoreNullExceptionAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/IgnoreNullException.cs) : Only ignores NullReferenceExceptions. This is an example of an attribute that inherits from IgnoreExceptionAttribute. 
-- [ParameterLogAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Logs parameter values when the method is called.
+- [IgnoreExceptionAttribute](Assets/Plugins/UnityDecoratorAttribute/IgnoreExceptionAttribute.cs) : Ignores exceptions and returns a default value when an exception is raised. 
+- [IgnoreNullExceptionAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/IgnoreNullException.cs) : Only ignores NullReferenceExceptions. This is an example of an attribute that inherits from IgnoreExceptionAttribute. 
+- [ParameterLogAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Logs parameter values when the method is called.
 
 ```c#
 [ParameterLog]
@@ -23,7 +23,7 @@ public void TestParameterLog(int a, float b, Text text)
 ```
 
  
-- [InstanceLogAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Logs parameter values and instance.ToString() when the method is called.
+- [InstanceLogAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/CallLog.cs) : Logs parameter values and instance.ToString() when the method is called.
 
 ```c#
 [InstanceLog]
@@ -38,11 +38,11 @@ public void TestInstanceLog(int a)
 
 ![image](https://user-images.githubusercontent.com/21076531/187033810-063e7924-224d-4277-a2ae-12b05bd04dfb.png) 
  
-- [CallCounterAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Stores the number of times a method is called and returns the count using `CallCounter.GetMethodCallCount(className, methodName)`.
+- [CallCounterAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/CallCounter.cs) : Stores the number of times a method is called and returns the count using `CallCounter.GetMethodCallCount(className, methodName)`.
 
 ![image](https://user-images.githubusercontent.com/21076531/184547638-25deef6e-2d46-461b-98a7-139ec116c122.png) 
  
-- [PerformanceCheckAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/PerformanceCheck.cs) : Stores the total execution time and count.
+- [PerformanceCheckAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/PerformanceCheck.cs) : Stores the total execution time and count.
 
 `PerformanceCheck.GetExecutionCount(className, methodName)`: Returns the number of times the method has been executed (called).
 
@@ -70,8 +70,8 @@ public void Update()
 
 ![image](https://user-images.githubusercontent.com/21076531/187035466-d63a8c20-6ef9-4962-8468-616d13903928.png) 
  
-- [ClampParameterAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamps the value of the first parameter. 
-- [ClampReturnAttribute](https://chat.openai.com/Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamps the return value.
+- [ClampParameterAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamps the value of the first parameter. 
+- [ClampReturnAttribute](Assets/Plugins/UnityDecoratorAttribute/Examples/ChangeParameter.cs) : Clamps the return value.
 ## Creating a Custom Attribute
 
 To create a custom attribute, you need to inherit from `UnityDecoratorAttribute.DecoratorAttribute`:
@@ -158,4 +158,4 @@ public enum ParameterType
 This library does not support coroutines or async methods.
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://chat.openai.com/LICENSE)  file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE)  file for details.
